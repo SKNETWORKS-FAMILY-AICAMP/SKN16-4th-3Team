@@ -22,11 +22,6 @@ def user_signup(user_create: schemas.UserCreate, db: Session = Depends(get_db)):
     if existing_nickname:
         raise HTTPException(status_code=409, detail="이미 사용 중인 닉네임입니다.")
 
-    # 사용자 이름 중복 확인
-    existing_user = db.query(models.User).filter(models.User.username == user_create.username).first()
-    if existing_user:
-        raise HTTPException(status_code=409, detail="이미 사용 중인 이름입니다.")
-
     # 이메일 중복 확인
     existing_email = db.query(models.User).filter(models.User.email == user_create.email).first()
     if existing_email:
