@@ -2,6 +2,8 @@ import React from 'react';
 import { Typography, Button, Space, Avatar, Dropdown } from 'antd';
 import { UserAddOutlined, LoginOutlined, UserOutlined, LogoutOutlined, SettingOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
+import { useNavigate } from 'react-router-dom';
+
 import type { User } from '@/api/user';
 
 const { Title } = Typography;
@@ -19,7 +21,7 @@ interface HeaderProps {
  * 애플리케이션 헤더 컴포넌트
  * 로그인 상태에 따라 다른 UI를 보여줍니다
  */
-export const Header: React.FC<HeaderProps> = ({
+const Header: React.FC<HeaderProps> = ({
   isLoggedIn = false,
   user,
   onLogin,
@@ -27,6 +29,8 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
   onMyPage,
 }) => {
+  const navigate = useNavigate();
+
   // 로그인된 사용자의 드롭다운 메뉴
   const userMenuItems: MenuProps['items'] = [
     {
@@ -54,7 +58,7 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
       <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-        <Title level={3} className="gradient-text mb-0">
+        <Title level={3} className="gradient-text mb-0 cursor-pointer" onClick={() => navigate('/')}>
           퍼스널 컬러 진단 AI
         </Title>
 
@@ -104,3 +108,5 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
+
+export default Header;
