@@ -16,7 +16,10 @@
     "pre-commit": "lint-staged"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.3",
+    "@tanstack/react-query-devtools": "^5.90.2",
     "antd": "^5.27.4",
+    "axios": "^1.12.2",
     "clsx": "^2.1.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"

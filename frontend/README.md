@@ -28,6 +28,11 @@ npm run dev
 - **Husky**: Git hooks를 통한 자동 검사
 - **lint-staged**: 커밋 전 staged 파일만 검사
 
+### API 관리
+- **TanStack Query**: 서버 상태 관리 및 캐싱
+- **Axios**: HTTP 클라이언트
+- **React Query DevTools**: 개발자 도구
+
 ### 사용 가능한 스크립트
 ```bash
 npm run dev          # 개발 서버 실행
@@ -39,17 +44,39 @@ npm run format:check # Prettier 검사
 npm run type-check   # TypeScript 타입 검사
 ```
 
-## 📁 프로젝트 구조
+## 🌐 API 사용 가이드
+
+### TanStack Query 훅 사용법
+```tsx
+import { useUsers, useCreateUser } from '@/hooks/useUser';
+
+function UserComponent() {
+  // 데이터 조회
+  const { data: users, isLoading, error } = useUsers();
+  
+  // 데이터 생성
+  const createUserMutation = useCreateUser();
+  
+  const handleCreate = async (userData) => {
+    try {
+      await createUserMutation.mutateAsync(userData);
+    } catch (error) {
+      console.error('생성 실패:', error);
+    }
+  };
+
+  if (isLoading) return <div>로딩 중...</div>;
+  if (error) return <div>오류 발생</div>;
+  
+  return <div>{/* UI 렌더링 */}</div>;
+}
 ```
-src/
-├── components/      # 재사용 가능한 컴포넌트
-├── pages/          # 페이지 컴포넌트
-├── hooks/          # 커스텀 훅
-├── utils/          # 유틸리티 함수
-├── types/          # TypeScript 타입 정의
-├── api/            # API 관련 코드
-└── assets/         # 정적 리소스
-```
+
+### API 클라이언트 설정
+- **기본 URL**: `VITE_API_BASE_URL` 환경변수
+- **인증**: Bearer Token 자동 추가
+- **에러 핸들링**: 401 오류 시 자동 로그아웃
+- **요청/응답 로깅**: 개발 환경에서만 활성화
 
 ## 🎨 코딩 컨벤션
 
@@ -127,73 +154,3 @@ import { cn } from '@/utils/cn';
 ### 개발 도구
 - **@tailwindcss/postcss**: PostCSS 통합
 - **autoprefixer**: CSS 벤더 프리픽스 자동 추가
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
