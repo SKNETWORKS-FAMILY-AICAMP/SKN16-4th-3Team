@@ -81,7 +81,7 @@ function App() {
               </Card>
             </Col>
             <Col xs={24} md={8}>
-              <Card className="text-center h-full card-hover" bordered={false}>
+              <Card className="text-center h-full card-hover" variant={'outlined'}>
                 <div className="text-4xl mb-4">⚡</div>
                 <Title level={4}>빠른 진단</Title>
                 <Paragraph className="text-gray-600">
@@ -90,7 +90,7 @@ function App() {
               </Card>
             </Col>
             <Col xs={24} md={8}>
-              <Card className="text-center h-full card-hover" bordered={false}>
+              <Card className="text-center h-full card-hover" variant={'outlined'}>
                 <div className="text-4xl mb-4">🎨</div>
                 <Title level={4}>정확한 AI 분석</Title>
                 <Paragraph className="!text-gray-600">
