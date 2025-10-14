@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, Routes, Route } from 'react-router-dom';
-import { ConfigProvider } from 'antd';
+import { ConfigProvider, FloatButton } from 'antd';
 
 import { HomePage, SignUpPage } from './pages';
 import { Header, Footer } from './components';
@@ -80,6 +80,7 @@ function App() {
 
         {/* Footer */}
         <Footer />
+        <FloatButton.BackTop type='primary' />
       </div>
     </ConfigProvider>
   );
