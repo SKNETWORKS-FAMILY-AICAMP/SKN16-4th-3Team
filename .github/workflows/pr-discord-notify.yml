@@ -1,0 +1,73 @@
+name: PR Discord Notify
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  discord-notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug Environment Variables
+        run: |
+          echo "GITHUB_ACTOR: ${{ github.actor }}"
+          echo "PR_TITLE: ${{ github.event.pull_request.title }}"
+          echo "PR_URL: ${{ github.event.pull_request.html_url }}"
+          echo "Webhook URL exists: ${{ secrets.DISCORD_WEBHOOK_URL != '' }}"
+          
+      - name: Send PR info to Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_REVIEWERS: ${{ join(github.event.pull_request.requested_reviewers.*.login, ', ') }}
+        run: |
+          # Discord Webhook URL 존재 여부 확인
+          if [ -z "$DISCORD_WEBHOOK" ]; then
+            echo "❌ DISCORD_WEBHOOK_URL secret이 설정되지 않았습니다."
+            exit 1
+          fi
+          
+          echo "✅ Discord Webhook URL이 설정되어 있습니다."
+          
+          # JSON payload 준비
+          payload=$(cat <<EOF
+          {
+            "embeds": [{
+              "title": "🔔 New Pull Request",
+              "description": "**${PR_TITLE}**",
+              "url": "${PR_URL}",
+              "color": 3447003,
+              "fields": [
+                {
+                  "name": "🤖 Author",
+                  "value": "${GITHUB_ACTOR}",
+                  "inline": true
+                },
+                {
+                  "name": "🔍 Reviewers",
+                  "value": "${PR_REVIEWERS:-'No reviewers assigned'}",
+                  "inline": true
+                }
+              ],
+              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+            }]
+          }
+          EOF
+          )
+          
+          # Discord webhook 호출
+          response=$(curl -s -w "%{http_code}" -o /tmp/discord_response.json \
+            -H "Content-Type: application/json" \
+            -d "$payload" \
+            "$DISCORD_WEBHOOK")
+          
+          echo "HTTP Status Code: $response"
+          if [ "$response" != "204" ]; then
+            echo "Discord API Response:"
+            cat /tmp/discord_response.json
+            exit 1
+          else
+            echo "Successfully sent Discord notification!"
+          fi
