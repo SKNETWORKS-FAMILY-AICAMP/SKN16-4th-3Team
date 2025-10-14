@@ -1,10 +1,35 @@
+import React from 'react';
 import { ConfigProvider, theme, Typography, Button, Card, Row, Col, Space } from 'antd';
-import { UserAddOutlined, LoginOutlined, HeartOutlined } from '@ant-design/icons';
+import { HeartOutlined } from '@ant-design/icons';
+import { Header } from './components';
 import './App.css';
+import type { User } from './api/user';
 
 const { Title, Paragraph } = Typography;
 
 function App() {
+  // TODO: API 연동 후 인증 상태를 전역으로 관리하도록 수정
+  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+  const [user, setUser] = React.useState<User>();
+
+  // 임시 로그인 함수 (실제로는 인증 API 호출)
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    setUser({
+      id: 1,
+      nickname: '테스트유저',
+      username: 'testuser',
+      email: 'test@example.com',
+      created_at: '2025-01-01',
+      gender: '남성'
+    });
+  };
+
+  // 로그아웃 함수
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUser(undefined);
+  };
   return (
     <ConfigProvider
       theme={{
@@ -17,24 +42,17 @@ function App() {
     >
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
         {/* Header */}
-        <header className="bg-white shadow-smooth">
-          <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-            <Title level={3} className="gradient-text mb-0">
-              퍼스널 컬러 진단 AI
-            </Title>
-            <Space>
-              <Button type="default" icon={<LoginOutlined />}>
-                로그인
-              </Button>
-              <Button type="primary" icon={<UserAddOutlined />}>
-                회원가입
-              </Button>
-            </Space>
-          </div>
-        </header>
+        <Header
+          isLoggedIn={isLoggedIn}
+          user={user}
+          onLogin={handleLogin}
+          onSignUp={() => console.log('회원가입 클릭')}
+          onLogout={handleLogout}
+          onMyPage={() => console.log('마이페이지 클릭')}
+        />
 
         {/* Main Content */}
-        <main className="max-w-6xl mx-auto px-4 py-12">
+        <main className="max-w-6xl mx-auto px-4 py-12 mt-18">
           {/* Hero Section */}
           <div className="text-center mb-16">
             <Title level={1} className="gradient-text text-5xl mb-4">
