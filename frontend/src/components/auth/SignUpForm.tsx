@@ -1,32 +1,34 @@
 import React from 'react';
-import { Form, Input, Button, Radio, message, Row, Col } from 'antd';
+import { Form, Input, Button, Radio } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
 import type { GenderType } from '@/api/user';
+import { useCreateUser } from '@/hooks/useUser';
 
 interface SignUpFormValues {
     nickname: string;
     username: string;
     password: string;
-    confirmPassword: string;
+    password_confirm: string;
     email: string;
     gender: GenderType
 }
 
 const SignUpForm: React.FC = () => {
     const navigate = useNavigate();
+    const createUser = useCreateUser();
 
     const [form] = Form.useForm();
 
     // 폼 제출 처리
     const handleSubmit = async (values: SignUpFormValues) => {
         try {
-            console.log('회원가입 데이터:', values);
-            message.success('회원가입이 완료되었습니다!');
-            // TODO: 로그인 페이지로 이동
+            await createUser.mutateAsync(values);
+            // 성공 시 홈으로 이동
             navigate('/');
         } catch (error) {
-            message.error('회원가입에 실패했습니다.');
+            // 에러는 useCreateUser의 onError에서 처리됨
+            console.error('회원가입 처리 중 에러:', error);
         }
     };
 
@@ -64,27 +66,6 @@ const SignUpForm: React.FC = () => {
         return Promise.resolve();
     };
 
-    // 닉네임 중복 검사 (추후 API 연동 예정)
-    const checkNicknameDuplicate = async (nickname: string) => {
-        try {
-            // TODO: 실제 API 호출로 변경
-            console.log('닉네임 중복 체크:', nickname);
-
-            // 임시 중복 체크 로직 (실제로는 서버에서 확인)
-            const duplicateTest = ['admin', 'test', '관리자'];
-            if (duplicateTest.includes(nickname.toLowerCase())) {
-                message.error('이미 사용중인 닉네임입니다');
-                return false;
-            }
-
-            message.success('사용 가능한 닉네임입니다');
-            return true;
-        } catch (error) {
-            message.error('중복 확인 중 오류가 발생했습니다');
-            return false;
-        }
-    };
-
     // 비밀번호 확인 validation
     const validateConfirmPassword = ({ getFieldValue }: any) => ({
         validator(_: any, value: string) {
@@ -114,30 +95,10 @@ const SignUpForm: React.FC = () => {
                     </div>
                 }
             >
-                <Row gutter={8}>
-                    <Col span={16}>
-                        <Input
-                            placeholder="닉네임을 입력하세요 (2~14자)"
-                            maxLength={14}
-                        />
-                    </Col>
-                    <Col span={8}>
-                        <Button
-                            htmlType="button"
-                            onClick={() => {
-                                const nickname = form.getFieldValue('nickname');
-                                if (nickname && !form.getFieldError('nickname').length) {
-                                    checkNicknameDuplicate(nickname);
-                                } else {
-                                    message.warning('올바른 닉네임을 먼저 입력해주세요');
-                                }
-                            }}
-                            block
-                        >
-                            중복 확인
-                        </Button>
-                    </Col>
-                </Row>
+                <Input
+                    placeholder="닉네임을 입력하세요 (2~14자)"
+                    maxLength={14}
+                />
             </Form.Item>
 
             <Form.Item
@@ -175,7 +136,7 @@ const SignUpForm: React.FC = () => {
 
             <Form.Item
                 label="비밀번호 확인"
-                name="confirmPassword"
+                name="password_confirm"
                 dependencies={['password']}
                 rules={[
                     { required: true, message: '비밀번호 확인을 입력하세요' },
