@@ -1,3 +1,4 @@
+import React from 'react';
 import { Form, Input, Button, message, Flex } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +12,7 @@ const LoginForm: React.FC = () => {
     const navigate = useNavigate();
     const [form] = Form.useForm<LoginFormValues>();
 
+    // 폼 제출 처리 (로그인 API 호출)
     const handleSubmit = async (values: LoginFormValues) => {
         try {
             console.log('로그인 데이터:', values);
