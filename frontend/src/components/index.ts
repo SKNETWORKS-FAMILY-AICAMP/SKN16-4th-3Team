@@ -7,3 +7,5 @@ export { default as LoginForm } from './auth/LoginForm';
 // layout 컴포넌트
 export { default as Header } from './layout/Header';
 export { default as Footer } from './layout/Footer';
+// utility 컴포넌트
+export { default as ScrollToTop } from './ScrollToTop';
