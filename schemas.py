@@ -47,3 +47,17 @@ class UserCreate(BaseModel):
             raise ValueError('비밀번호가 일치하지 않습니다.')
         
         return self
+class User(BaseModel):
+    id: int
+    username: str
+    nickname: str
+    email: str
+    gender: str | None = None
+
+    class Config:
+        from_attributes = True
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    user: User
