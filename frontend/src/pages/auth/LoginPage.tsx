@@ -10,7 +10,7 @@ interface LoginFormValues {
     password: string;
 }
 
-const LoginForm: React.FC = () => {
+const LoginPage: React.FC = () => {
     const navigate = useNavigate();
     const [form] = Form.useForm<LoginFormValues>();
 
@@ -18,10 +18,10 @@ const LoginForm: React.FC = () => {
     const handleSubmit = async (values: LoginFormValues) => {
         try {
             console.log('로그인 데이터:', values);
-            
+
             // TODO: 실제 로그인 API 호출
             // const response = await loginAPI(values);
-            
+
             message.success('로그인 성공!');
             navigate('/'); // 메인 페이지로 이동
         } catch (error) {
@@ -50,7 +50,7 @@ const LoginForm: React.FC = () => {
                             form={form}
                             layout="vertical"
                             onFinish={handleSubmit}
-                            size="large"
+
                         >
                             <Form.Item
                                 label="닉네임"
@@ -63,7 +63,7 @@ const LoginForm: React.FC = () => {
                                 <Input
                                     prefix={<UserOutlined style={{ color: '#bfbfbf' }} />}
                                     placeholder="닉네임"
-                                    className="h-12 rounded-lg"
+
                                 />
                             </Form.Item>
 
@@ -77,7 +77,7 @@ const LoginForm: React.FC = () => {
                                 <Input.Password
                                     prefix={<LockOutlined style={{ color: '#bfbfbf' }} />}
                                     placeholder="비밀번호"
-                                    className="h-12 rounded-lg"
+
                                 />
                             </Form.Item>
 
@@ -88,7 +88,6 @@ const LoginForm: React.FC = () => {
                                     type="primary"
                                     htmlType="submit"
                                     block
-                                    size="large"
                                     className="h-12 rounded-lg text-base font-semibold mb-4 bg-gray-800 hover:bg-gray-700 border-gray-800"
                                 >
                                     LOGIN
@@ -97,7 +96,6 @@ const LoginForm: React.FC = () => {
                                 {/* 회원가입 버튼 */}
                                 <Button
                                     block
-                                    size="large"
                                     onClick={handleSignupClick}
                                     className="h-11 rounded-lg text-sm text-gray-600 border-gray-300 hover:border-gray-400 hover:text-gray-700"
                                 >
@@ -112,4 +110,4 @@ const LoginForm: React.FC = () => {
     );
 };
 
-export default LoginForm;
+export default LoginPage;

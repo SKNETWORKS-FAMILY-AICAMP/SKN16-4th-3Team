@@ -2,8 +2,7 @@ import React from 'react';
 import { useNavigate, Routes, Route } from 'react-router-dom';
 import { ConfigProvider, FloatButton } from 'antd';
 
-import { HomePage, SignUpPage } from './pages';
-import LoginPage from './pages/auth/Login'; // 로그인 페이지 import 추가
+import { HomePage, SignUpPage, LoginPage } from './pages';
 import { Header, Footer } from './components';
 
 import type { User } from './api/user';
