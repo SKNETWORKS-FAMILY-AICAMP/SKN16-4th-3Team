@@ -10,10 +10,10 @@ export type GenderType = '남성' | '여성';
 
 export interface User {
     id: number;
-    nickname: string;
     username: string;
+    nickname: string;
     email: string;
-    created_at: string;
+    // created_at: string;
     gender?: GenderType;
 }
 
@@ -21,6 +21,7 @@ export interface CreateUserRequest {
     nickname: string
     username: string;
     password: string;
+    password_confirm: string;
     email: string;
     gender?: GenderType;
 }
@@ -54,7 +55,7 @@ export const userApi = {
 
     // 사용자 생성
     createUser: async (userData: CreateUserRequest): Promise<User> => {
-        const response = await apiClient.post<User>('/users', userData);
+        const response = await apiClient.post<User>('/users/signup', userData);
         return response.data;
     },
 
@@ -66,13 +67,13 @@ export const userApi = {
 
     // 로그인
     login: async (credentials: LoginRequest): Promise<LoginResponse> => {
-        const response = await apiClient.post<LoginResponse>('/auth/login', credentials);
+        const response = await apiClient.post<LoginResponse>('/users/login', credentials);
         return response.data;
     },
 
     // 현재 사용자 정보 조회
     getCurrentUser: async (): Promise<User> => {
-        const response = await apiClient.get<User>('/auth/me');
+        const response = await apiClient.get<User>('/users/me');
         return response.data;
     },
 };

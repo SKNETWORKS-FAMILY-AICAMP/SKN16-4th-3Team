@@ -3,7 +3,7 @@ import { useNavigate, Routes, Route } from 'react-router-dom';
 import { ConfigProvider, FloatButton } from 'antd';
 
 import { HomePage, SignUpPage } from './pages';
-import { Header, Footer } from './components';
+import { Header, Footer, ScrollToTop } from './components';
 
 import type { User } from './api/user';
 import './App.css';
@@ -25,7 +25,7 @@ function App() {
       nickname: '테스트유저',
       username: 'testuser',
       email: 'test@example.com',
-      created_at: '2025-01-01',
+      // created_at: '2025-01-01',
       gender: '남성'
     });
   };
@@ -58,6 +58,8 @@ function App() {
       }}
     >
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+        {/* 페이지 이동 시 스크롤 맨 위로 */}
+        <ScrollToTop />
 
         {/* Header */}
         <Header
