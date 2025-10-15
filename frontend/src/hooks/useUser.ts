@@ -10,7 +10,7 @@ export const useUsers = () => {
     return useQuery({
         queryKey: queryKeys.users.lists(),
         queryFn: userApi.getUsers,
-        select: (users: User[]) => users.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
+        // select: (users: User[]) => users.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
     });
 };
 
@@ -52,11 +52,14 @@ export const useCreateUser = () => {
             // 새 사용자를 캐시에 직접 추가 (Optimistic Update)
             queryClient.setQueryData(queryKeys.users.detail(newUser.id), newUser);
 
-            message.success('사용자가 성공적으로 생성되었습니다.');
+            message.success('회원가입이 완료되었습니다.');
         },
-        onError: (error) => {
+        onError: (error: any) => {
             console.error('사용자 생성 실패:', error);
-            message.error('사용자 생성에 실패했습니다.');
+
+            // 서버에서 보낸 상세 에러 메시지 표시
+            const errorMessage = error?.response?.data?.detail || '회원가입에 실패했습니다.';
+            message.error(errorMessage);
         },
     });
 };
@@ -79,9 +82,12 @@ export const useDeleteUser = () => {
 
             message.success('탈퇴되었습니다.');
         },
-        onError: (error) => {
+        onError: (error: any) => {
             console.error('사용자 탈퇴 실패:', error);
-            message.error('사용자 탈퇴에 실패했습니다.');
+
+            // 서버에서 보낸 상세 에러 메시지 표시
+            const errorMessage = error?.response?.data?.detail || '사용자 탈퇴에 실패했습니다.';
+            message.error(errorMessage);
         },
     });
 };
@@ -103,9 +109,12 @@ export const useLogin = () => {
 
             message.success('로그인 성공!');
         },
-        onError: (error) => {
+        onError: (error: any) => {
             console.error('로그인 실패:', error);
-            message.error('로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.');
+
+            // 서버에서 보낸 상세 에러 메시지 표시
+            const errorMessage = error?.response?.data?.detail || '로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.';
+            message.error(errorMessage);
         },
     });
 };
