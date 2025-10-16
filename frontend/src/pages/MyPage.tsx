@@ -194,18 +194,20 @@ const MyPage: React.FC = () => {
                                     </div>
 
                                     {/* 두 번째 행 */}
-                                    {/* TODO: /me api에 create_date 추가 */}
                                     <div className="flex flex-col py-3">
                                         <Text strong className="text-gray-700 mb-2">가입일</Text>
-                                        <Text className="text-gray-900">최근 가입</Text>
+                                        <Text className="text-gray-900">
+                                            {user.create_date ? new Date(user.create_date).toLocaleDateString('ko-KR') : '정보 없음'}
+                                        </Text>
                                     </div>
 
-                                    {/* TODO: /me api에 is_active 추가 */}
                                     <div className="flex flex-col py-3">
                                         <Text strong className="text-gray-700 mb-2">계정 상태</Text>
                                         <div className="flex items-center">
-                                            <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                                            <Text className="text-green-600">활성</Text>
+                                            <div className={`w-2 h-2 rounded-full mr-2 ${user.is_active ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                                            <Text className={user.is_active ? 'text-green-600' : 'text-red-600'}>
+                                                {user.is_active ? '활성' : '탈퇴'}
+                                            </Text>
                                         </div>
                                     </div>
                                 </div>

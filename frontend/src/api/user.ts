@@ -13,7 +13,8 @@ export interface User {
     username: string;
     nickname: string;
     email: string;
-    // created_at: string;
+    create_date: string;
+    is_active: boolean;
     gender?: GenderType;
 }
 
