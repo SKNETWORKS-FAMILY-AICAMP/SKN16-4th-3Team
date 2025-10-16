@@ -16,6 +16,7 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { usePersonalColorTest } from '@/hooks/usePersonalColorTest';
+import { useCurrentUser } from '@/hooks/useUser';
 import RouterPaths from '@/routes/Router';
 import type { PersonalColorType } from '@/types/personalColor';
 
@@ -23,6 +24,7 @@ const { Title, Text } = Typography;
 
 const PersonalColorTest: React.FC = () => {
     const navigate = useNavigate();
+    const { data: user, isLoading: userLoading } = useCurrentUser();
     const {
         currentQuestion,
         progress,
@@ -82,6 +84,11 @@ const PersonalColorTest: React.FC = () => {
         navigate(RouterPaths.Home);
     };
 
+    // 로그인 페이지로 이동
+    const handleGoToLogin = () => {
+        navigate(RouterPaths.Login);
+    };
+
     // 퍼스널컬러 타입별 색상 매핑
     const getColorTypeStyle = (type: PersonalColorType) => {
         const colorMap = {
@@ -92,6 +99,96 @@ const PersonalColorTest: React.FC = () => {
         };
         return colorMap[type];
     };
+
+    // 로딩 중일 때
+    if (userLoading) {
+        return (
+            <div
+                className="min-h-screen flex items-center justify-center"
+                style={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                }}
+            >
+                <div className="w-full max-w-md mx-auto p-4">
+                    <Card
+                        className="shadow-2xl border-0 text-center"
+                        style={{
+                            borderRadius: '20px',
+                            background: 'rgba(255, 255, 255, 0.95)',
+                            backdropFilter: 'blur(10px)'
+                        }}
+                    >
+                        <Alert
+                            message="로딩 중..."
+                            type="info"
+                            showIcon
+                            style={{
+                                background: 'transparent',
+                                border: 'none'
+                            }}
+                        />
+                    </Card>
+                </div>
+            </div>
+        );
+    }
+
+    // 로그인하지 않은 경우
+    if (!user) {
+        return (
+            <div
+                className="min-h-screen flex items-center justify-center"
+                style={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                }}
+            >
+                <div className="w-full max-w-md mx-auto p-4">
+                    <Card
+                        className="shadow-2xl border-0"
+                        style={{
+                            borderRadius: '20px',
+                            background: 'rgba(255, 255, 255, 0.95)',
+                            backdropFilter: 'blur(10px)'
+                        }}
+                    >
+                        <div className="text-center p-6">
+                            <Title level={3} className="mb-4 text-gray-800">
+                                🔐 로그인이 필요합니다
+                            </Title>
+                            <Text className="text-gray-600 block mb-6">
+                                퍼스널 컬러 테스트를 이용하려면 로그인해주세요.
+                            </Text>
+                            <div className="flex gap-3 justify-center">
+                                <Button
+                                    onClick={handleGoHome}
+                                    size="large"
+                                    style={{
+                                        borderColor: '#d1d5db',
+                                        color: '#6b7280',
+                                        borderRadius: '10px'
+                                    }}
+                                >
+                                    홈으로 가기
+                                </Button>
+                                <Button
+                                    type="primary"
+                                    onClick={handleGoToLogin}
+                                    size="large"
+                                    style={{
+                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                        border: 'none',
+                                        borderRadius: '10px'
+                                    }}
+                                >
+                                    로그인하기
+                                </Button>
+                            </div>
+                        </div>
+                    </Card>
+                </div>
+            </div>
+        );
+    }
 
     // 결과 화면
     if (result) {
