@@ -48,21 +48,9 @@ export const userApi = {
         return response.data;
     },
 
-    // 특정 사용자 조회
-    getUser: async (id: number): Promise<User> => {
-        const response = await apiClient.get<User>(`/users/${id}`);
-        return response.data;
-    },
-
     // 사용자 생성
     createUser: async (userData: CreateUserRequest): Promise<User> => {
         const response = await apiClient.post<User>('/users/signup', userData);
-        return response.data;
-    },
-
-    // 사용자 수정 (탈퇴 시 상태 변경 용도)
-    deleteUser: async (id: number): Promise<User> => {
-        const response = await apiClient.put<User>(`/users/${id}`);
         return response.data;
     },
 
@@ -84,6 +72,21 @@ export const userApi = {
     // 현재 사용자 정보 조회
     getCurrentUser: async (): Promise<User> => {
         const response = await apiClient.get<User>('/users/me');
+        return response.data;
+    },
+
+    // 현재 사용자 회원탈퇴
+    deleteCurrentUser: async (password: string): Promise<{ message: string; detail: string }> => {
+        // FormData를 사용하여 비밀번호 전송
+        const formData = new URLSearchParams();
+        formData.append('password', password);
+
+        const response = await apiClient.delete<{ message: string; detail: string }>('/users/me', {
+            data: formData,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        });
         return response.data;
     },
 };

@@ -16,37 +16,26 @@ export const useUsers = () => {
 };
 
 /**
- * 특정 사용자 조회 훅
- */
-export const useUser = (id: number) => {
-    return useQuery({
-        queryKey: queryKeys.users.detail(id),
-        queryFn: () => userApi.getUser(id),
-        enabled: !!id,
-    });
-};
-
-/**
  * 현재 사용자 정보 조회 훅
- * API가 준비되지 않아 localStorage에서 사용자 정보를 가져옵니다
+ * API 서버에서 현재 사용자 정보를 가져옵니다
  */
 export const useCurrentUser = () => {
     return useQuery({
         queryKey: queryKeys.auth.currentUser(),
-        queryFn: () => {
+        queryFn: async () => {
             const token = localStorage.getItem('access_token');
-            const userData = localStorage.getItem('user_data');
 
-            if (!token || !userData) {
+            if (!token) {
                 throw new Error('로그인 정보가 없습니다');
             }
 
-            return JSON.parse(userData) as User;
+            // API에서 현재 사용자 정보 조회 (localStorage fallback 제거)
+            return await userApi.getCurrentUser();
         },
         // 토큰이 있을 때만 요청
         enabled: !!localStorage.getItem('access_token'),
-        retry: false, // API 호출이 아니므로 재시도 불필요
-        staleTime: Infinity, // localStorage 데이터는 fresh로 간주
+        retry: 1, // API 호출 실패시 1번 재시도
+        staleTime: 5 * 60 * 1000, // 5분간 fresh로 간주
     });
 };
 
@@ -78,28 +67,28 @@ export const useCreateUser = () => {
 };
 
 /**
- * 사용자 탈퇴 뮤테이션 훅
+ * 현재 사용자 회원탈퇴 뮤테이션 훅
  */
-export const useDeleteUser = () => {
+export const useDeleteCurrentUser = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ id }: { id: number; }) =>
-            userApi.deleteUser(id),
-        onSuccess: (deletedUser: User) => {
-            // 해당 사용자 탈퇴 처리 후 상세 정보 업데이트
-            queryClient.setQueryData(queryKeys.users.detail(deletedUser.id), deletedUser);
+        mutationFn: ({ password }: { password: string }) =>
+            userApi.deleteCurrentUser(password),
+        onSuccess: () => {
+            // 로그아웃 처리
+            localStorage.removeItem('access_token');
 
-            // 사용자 목록도 업데이트
-            queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
+            // 모든 쿼리 캐시 클리어
+            queryClient.clear();
 
-            message.success('탈퇴되었습니다.');
+            message.success('회원탈퇴가 완료되었습니다.');
         },
         onError: (error: any) => {
-            console.error('사용자 탈퇴 실패:', error);
+            console.error('회원탈퇴 실패:', error);
 
             // 서버에서 보낸 상세 에러 메시지 표시
-            const errorMessage = getErrorMessage(error, '사용자 탈퇴에 실패했습니다.');
+            const errorMessage = getErrorMessage(error, '회원탈퇴에 실패했습니다.');
             message.error(errorMessage);
         },
     });
@@ -114,11 +103,8 @@ export const useLogin = () => {
     return useMutation({
         mutationFn: (credentials: LoginRequest) => userApi.login(credentials),
         onSuccess: (response) => {
-            // 토큰 저장
+            // 토큰만 저장 (사용자 정보는 API로 조회)
             localStorage.setItem('access_token', response.access_token);
-
-            // 사용자 정보도 localStorage에 저장
-            localStorage.setItem('user_data', JSON.stringify(response.user));
 
             // 현재 사용자 정보 캐시에 저장
             queryClient.setQueryData(queryKeys.auth.currentUser(), response.user);
@@ -142,9 +128,8 @@ export const useLogout = () => {
     const queryClient = useQueryClient();
 
     return () => {
-        // 토큰 및 사용자 정보 제거
+        // 토큰 제거
         localStorage.removeItem('access_token');
-        localStorage.removeItem('user_data');
 
         // 모든 쿼리 캐시 클리어
         queryClient.clear();
