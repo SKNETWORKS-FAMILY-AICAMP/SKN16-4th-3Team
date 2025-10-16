@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, Field, model_validator
-from typing import List, Optional, Literal
+from typing import List, Dict, Optional, Literal
 import re
 
 class UserCreate(BaseModel):
@@ -81,9 +81,10 @@ class SurveyAnswer(BaseModel):
     """
     id: int
     survey_result_id: int
-    question_id: int
+    question_id: str
     option_id: str
     option_label: str
+    score_map: Dict[str, int]
 
     class Config:
         from_attributes = True
