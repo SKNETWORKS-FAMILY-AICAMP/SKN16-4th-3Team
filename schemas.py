@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field, model_validator
 from datetime import datetime
+from pydantic import BaseModel, Field, model_validator, field_validator
 import re
 from typing import List, Optional
 import datetime
@@ -86,6 +86,13 @@ class SurveyAnswer(BaseModel):
     option_id: str
     option_label: str
 
+    @field_validator("score_map", mode="before")
+    @classmethod
+    def parse_score_map(cls, v):
+        if isinstance(v, str):
+            return json.loads(v)
+        return v
+
     class Config:
         from_attributes = True
 
@@ -96,7 +103,7 @@ class SurveyResult(BaseModel):
     """
     id: int
     user_id: Optional[int]
-    created_at: datetime.datetime
+    created_at: datetime
     result_tone: str
     confidence: float
     total_score: int
