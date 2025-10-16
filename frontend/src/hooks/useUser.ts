@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userApi, type User, type CreateUserRequest, type LoginRequest } from '../api/user';
 import { queryKeys } from '../lib/query-client';
 import { message } from 'antd';
+import { getErrorMessage } from '@/utils/handleApiError';
 
 /**
  * 사용자 목록 조회 훅
@@ -58,7 +59,7 @@ export const useCreateUser = () => {
             console.error('사용자 생성 실패:', error);
 
             // 서버에서 보낸 상세 에러 메시지 표시
-            const errorMessage = error?.response?.data?.detail || '회원가입에 실패했습니다.';
+            const errorMessage = getErrorMessage(error, '회원가입에 실패했습니다.');
             message.error(errorMessage);
         },
     });
@@ -86,7 +87,7 @@ export const useDeleteUser = () => {
             console.error('사용자 탈퇴 실패:', error);
 
             // 서버에서 보낸 상세 에러 메시지 표시
-            const errorMessage = error?.response?.data?.detail || '사용자 탈퇴에 실패했습니다.';
+            const errorMessage = getErrorMessage(error, '사용자 탈퇴에 실패했습니다.');
             message.error(errorMessage);
         },
     });
@@ -113,7 +114,7 @@ export const useLogin = () => {
             console.error('로그인 실패:', error);
 
             // 서버에서 보낸 상세 에러 메시지 표시
-            const errorMessage = error?.response?.data?.detail || '로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.';
+            const errorMessage = getErrorMessage(error, '로그인에 실패했습니다. 닉네임과 비밀번호를 확인해주세요.');
             message.error(errorMessage);
         },
     });
