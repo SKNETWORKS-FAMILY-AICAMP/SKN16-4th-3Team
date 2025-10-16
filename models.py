@@ -15,6 +15,7 @@ class User(Base):
     create_date = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     is_active = Column(Boolean, default=True)  # > is_deleted -> is_active 변경
 
+# 퍼스널컬러 진단 설문 저장용 모델 추가
 class SurveyResult(Base):
     __tablename__ = "survey_result"
     id = Column(Integer, primary_key=True, index=True)
@@ -23,17 +24,14 @@ class SurveyResult(Base):
     result_tone = Column(String(20))
     confidence = Column(Float)
     total_score = Column(Integer)
-
-    user = relationship("User", backref="survey_results")
-    answers = relationship("SurveyAnswer", back_populates="survey", cascade="all, delete-orphan")
+    answers = relationship("SurveyAnswer", back_populates="result")
 
 class SurveyAnswer(Base):
     __tablename__ = "survey_answer"
     id = Column(Integer, primary_key=True, index=True)
-    survey_result_id = Column(Integer, ForeignKey("survey_result.id"), nullable=False)
-    question_id = Column(String(100), nullable=False)
-    option_id = Column(String(100), nullable=False)
-    option_label = Column(Text, nullable=False)
-    score_map = Column(Text, nullable=True)
-
-    survey = relationship("SurveyResult", back_populates="answers")
+    survey_result_id = Column(Integer, ForeignKey("survey_result.id"))
+    question_id = Column(String(50))
+    option_id = Column(String(50))
+    option_label = Column(String(255))
+    score_map = Column(Text)  # JSON 문자열
+    result = relationship("SurveyResult", back_populates="answers")
