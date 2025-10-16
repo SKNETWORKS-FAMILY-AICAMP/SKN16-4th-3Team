@@ -3,7 +3,7 @@ import { Typography } from "antd"
 const { Title, Paragraph } = Typography;
 
 const Footer = () => {
-    return <footer className="bg-gray-800 !text-white py-8 mt-16">
+    return <footer className="bg-gray-800 !text-white py-8">
         <div className="max-w-6xl mx-auto px-4 text-center">
             <Title level={4} className="!text-white mb-2">
                 퍼스널 컬러 진단 AI
