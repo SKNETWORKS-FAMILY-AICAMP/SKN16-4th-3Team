@@ -1,8 +1,10 @@
 import React from 'react';
 import { Row, Col, Card, Typography, Button, Space, Avatar } from 'antd';
 import { UserOutlined, EditOutlined, ManOutlined, WomanOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import { useCurrentUser } from '@/hooks/useUser';
 import { getGenderAvatarConfig } from '@/utils/genderUtils';
+import RouterPaths from '@/routes/Router';
 
 const { Title, Text } = Typography;
 
@@ -11,6 +13,12 @@ const { Title, Text } = Typography;
  */
 const MyPage: React.FC = () => {
     const { data: user, isLoading } = useCurrentUser();
+    const navigate = useNavigate();
+
+    // 퍼스널 컬러 테스트로 이동
+    const handleGoToTest = () => {
+        navigate(RouterPaths.PersonalColorTest);
+    };
 
     // 성별에 따른 아바타 렌더링
     const getGenderAvatar = () => {
@@ -155,7 +163,7 @@ const MyPage: React.FC = () => {
                             </Space>
 
                             <div className="mt-6">
-                                <Button type="primary" block>
+                                <Button type="primary" block onClick={handleGoToTest}>
                                     퍼스널 컬러 진단하기
                                 </Button>
                             </div>
@@ -174,7 +182,7 @@ const MyPage: React.FC = () => {
                             <div className="text-center py-8">
                                 <Text type="secondary">아직 진단 기록이 없습니다.</Text>
                                 <div className="mt-4">
-                                    <Button type="primary">첫 진단 시작하기</Button>
+                                    <Button type="primary" onClick={handleGoToTest}>첫 진단 시작하기</Button>
                                 </div>
                             </div>
                         </Card>
