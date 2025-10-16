@@ -23,12 +23,6 @@ export const useCurrentUser = () => {
     return useQuery({
         queryKey: queryKeys.auth.currentUser(),
         queryFn: async () => {
-            const token = localStorage.getItem('access_token');
-
-            if (!token) {
-                throw new Error('로그인 정보가 없습니다');
-            }
-
             // API에서 현재 사용자 정보 조회 (localStorage fallback 제거)
             return await userApi.getCurrentUser();
         },
