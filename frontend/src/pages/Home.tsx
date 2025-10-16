@@ -1,12 +1,20 @@
 import React from 'react';
 import { Typography, Button, Card, Row, Col, Space } from 'antd';
-import { HeartOutlined } from '@ant-design/icons';
+import { HeartOutlined, PlayCircleOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
+import RouterPaths from '@/routes/Router';
 
 const { Title, Paragraph } = Typography;
 
 const HomePage: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleStartTest = () => {
+    navigate(RouterPaths.PersonalColorTest);
+  };
+
   return (
-    <main className="max-w-6xl mx-auto px-4 py-12 mt-18">
+    <main className="max-w-6xl mx-auto px-4 py-12">
       <div className="text-center mb-16">
         <Title level={1} className="gradient-text text-5xl mb-4">
           나만의 퍼스널 컬러를 찾아보세요
@@ -16,7 +24,13 @@ const HomePage: React.FC = () => {
           피부톤, 눈동자 색, 머리카락 색상에 대한 몇 가지 질문으로 정확한 진단을 받아보세요.
         </Paragraph>
         <Space size="large">
-          <Button type="primary" size="large" className="px-8 py-6 h-auto">
+          <Button
+            type="primary"
+            size="large"
+            icon={<PlayCircleOutlined />}
+            className="px-8 py-6 h-auto"
+            onClick={handleStartTest}
+          >
             진단 시작하기
           </Button>
         </Space>
@@ -62,7 +76,13 @@ const HomePage: React.FC = () => {
           <Paragraph className="!text-blue-100 text-lg mb-6">
             무료 회원가입 후 간단한 질문으로 나만의 퍼스널 컬러를 발견해보세요
           </Paragraph>
-          <Button type="default" size="large" icon={<HeartOutlined />} className="px-8 py-6 h-auto">
+          <Button
+            type="default"
+            size="large"
+            icon={<HeartOutlined />}
+            className="px-8 py-6 h-auto"
+            onClick={handleStartTest}
+          >
             무료로 시작하기
           </Button>
         </div>

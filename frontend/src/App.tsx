@@ -2,7 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ConfigProvider, FloatButton } from 'antd';
 
-import { HomePage, SignUpPage, LoginPage, MyPage } from './pages';
+import { HomePage, SignUpPage, LoginPage, MyPage, PersonalColorTestPage } from './pages';
 import { Header, Footer, ScrollToTop } from './components';
 
 import './App.css';
@@ -27,12 +27,15 @@ function App() {
         <Header />
 
         {/* Main Routes */}
-        <Routes>
-          <Route path={RouterPaths.Home} element={<HomePage />} />
-          <Route path={RouterPaths.SignUp} element={<SignUpPage />} />
-          <Route path={RouterPaths.Login} element={<LoginPage />} />
-          <Route path={RouterPaths.MyPage} element={<MyPage />} />
-        </Routes>
+        <div className='mt-16'>
+          <Routes>
+            <Route path={RouterPaths.Home} element={<HomePage />} />
+            <Route path={RouterPaths.SignUp} element={<SignUpPage />} />
+            <Route path={RouterPaths.Login} element={<LoginPage />} />
+            <Route path={RouterPaths.MyPage} element={<MyPage />} />
+            <Route path={RouterPaths.PersonalColorTest} element={<PersonalColorTestPage />} />
+          </Routes>
+        </div>
 
         {/* Footer */}
         <Footer />
