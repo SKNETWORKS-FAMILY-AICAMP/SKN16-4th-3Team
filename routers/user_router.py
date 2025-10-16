@@ -62,7 +62,7 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     # nickname으로 사용자 검색 + 탈퇴회원 제외
     user = db.query(models.User).filter(
         models.User.nickname == form_data.username, 
-        models.User.is_deleted == False
+        models.User.is_active == True
     ).first()
     if not user or not hashing.verify_password(form_data.password, user.password):
         raise HTTPException(
@@ -100,7 +100,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         raise credentials_exception
     user = db.query(models.User).filter(
         models.User.nickname == nickname, 
-        models.User.is_deleted == False # 탈퇴 회원 걸러내기
+        models.User.is_active == True # 탈퇴 회원 걸러내기
     ).first()
     if user is None:
         raise credentials_exception
@@ -120,7 +120,7 @@ async def delete_user_account(
         )
     try:
         # 상태값 변경 (실제 삭제 대신)
-        current_user.is_deleted = True
+        current_user.is_active = False
         db.commit()
         return {
             "message": "회원탈퇴가 완료되었습니다.",

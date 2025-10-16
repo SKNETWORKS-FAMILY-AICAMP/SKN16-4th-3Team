@@ -12,4 +12,4 @@ class User(Base):
     email = Column(String(255), unique=True, index=True, nullable=False)
     gender = Column(Enum("여성", "남성", name="gender_enum"), nullable=True)
     create_date = Column(DateTime, default=datetime.datetime.now)
-    is_deleted = Column(Boolean, default=False)  # 소프트 딜리트용 필드 추가
+    is_active = Column(Boolean, default=True)  # > is_deleted -> is_active 변경  
