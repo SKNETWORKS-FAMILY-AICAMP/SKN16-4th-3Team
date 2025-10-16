@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, Routes, Route } from 'react-router-dom';
 import { ConfigProvider, FloatButton } from 'antd';
 
-import { HomePage, SignUpPage } from './pages';
+import { HomePage, SignUpPage, LoginPage } from './pages';
 import { Header, Footer, ScrollToTop } from './components';
 
 import type { User } from './api/user';
@@ -38,8 +38,12 @@ function App() {
 
   // 회원가입 페이지로 이동
   const handleSignUp = () => {
-    // React Router의 navigate를 사용하여 페이지 이동
     navigation(RouterPaths.SignUp);
+  };
+
+  // 로그인 페이지로 이동 (함수 추가)
+  const handleLoginPage = () => {
+    navigation(RouterPaths.Login);
   };
 
   // 마이페이지로 이동
@@ -65,7 +69,7 @@ function App() {
         <Header
           isLoggedIn={isLoggedIn}
           user={user}
-          onLogin={handleLogin}
+          onLogin={handleLoginPage} // 로그인 페이지로 이동하도록 변경
           onSignUp={handleSignUp}
           onLogout={handleLogout}
           onMyPage={handleMyPage}
@@ -75,8 +79,8 @@ function App() {
         <Routes>
           <Route path={RouterPaths.Home} element={<HomePage />} />
           <Route path={RouterPaths.SignUp} element={<SignUpPage />} />
+          <Route path={RouterPaths.Login} element={<LoginPage />} /> {/* 로그인 라우트 추가 */}
           {/* TODO: 추가 라우트들 */}
-          {/* <Route path={RouterPaths.Login} element={<LoginPage />} /> */}
           {/* <Route path={RouterPaths.MyPage} element={<MyPage />} /> */}
         </Routes>
 

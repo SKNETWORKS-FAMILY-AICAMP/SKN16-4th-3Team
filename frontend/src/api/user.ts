@@ -27,7 +27,8 @@ export interface CreateUserRequest {
 }
 
 export interface LoginRequest {
-    nickname: string;
+    // TODO: nickname을 받고 있으나 FastAPI의 OAuth2PasswordRequestForm은 username 필드를 요구하여 username으로 맞춤
+    username: string;
     password: string;
 }
 
@@ -67,7 +68,16 @@ export const userApi = {
 
     // 로그인
     login: async (credentials: LoginRequest): Promise<LoginResponse> => {
-        const response = await apiClient.post<LoginResponse>('/users/login', credentials);
+        // OAuth2PasswordRequestForm은 application/x-www-form-urlencoded 형식을 요구
+        const formData = new URLSearchParams();
+        formData.append('username', credentials.username);
+        formData.append('password', credentials.password);
+
+        const response = await apiClient.post<LoginResponse>('/users/login', formData, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        });
         return response.data;
     },
 
