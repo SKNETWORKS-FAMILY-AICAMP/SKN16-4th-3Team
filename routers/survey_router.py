@@ -46,3 +46,14 @@ async def submit_survey(
     db.commit()
     return {"message": "설문 결과 저장 완료", "survey_result_id": survey_result.id}
 
+@router.get("/list", response_model=list[schemas.SurveyResult])
+async def get_my_survey_results(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    if not current_user or not current_user.is_active:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="로그인 필요")
+    results = db.query(models.SurveyResult).filter(
+        models.SurveyResult.user_id == current_user.id
+    ).order_by(models.SurveyResult.created_at.desc()).all()
+    return results
