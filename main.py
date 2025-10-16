@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # routers 폴더의 user_router를 import
 from routers import user_router
-
+from routers import survey_router
 app = FastAPI()
 
 origins = [
@@ -24,3 +24,5 @@ def read_root():
 
 # user_router.py에 있는 API들을 앱에 포함
 app.include_router(user_router.router)
+
+app.include_router(survey_router.router)

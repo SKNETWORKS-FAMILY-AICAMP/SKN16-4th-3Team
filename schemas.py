@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field, model_validator
 import re
+from typing import List, Dict, Optional
+import datetime
 
 class UserCreate(BaseModel):
     nickname: str = Field(min_length=2, max_length=14)
@@ -61,3 +63,39 @@ class Token(BaseModel):
     access_token: str
     token_type: str
     user: User
+
+class SurveyAnswerCreate(BaseModel):
+    question_id: str
+    option_id: str
+    option_label: str
+    score_map: Dict[str, int]
+
+class SurveyResultCreate(BaseModel):
+    user_id: Optional[int] = None
+    answers: List[SurveyAnswerCreate]
+    result_tone: str
+    confidence: float
+    total_score: int
+
+class SurveyAnswer(BaseModel):
+    id: int
+    survey_result_id: int
+    question_id: str
+    option_id: str
+    option_label: str
+    score_map: Dict[str, int]
+
+    class Config:
+        from_attributes = True
+
+class SurveyResult(BaseModel):
+    id: int
+    user_id: Optional[int]
+    created_at: datetime.datetime
+    result_tone: str
+    confidence: float
+    total_score: int
+    answers: List[SurveyAnswer] = []
+
+    class Config:
+        from_attributes = True
