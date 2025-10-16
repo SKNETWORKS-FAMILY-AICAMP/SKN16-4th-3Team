@@ -86,6 +86,13 @@ class SurveyAnswer(BaseModel):
     option_label: str
     score_map: Dict[str, int]
 
+    @field_validator("score_map", mode="before")
+    @classmethod
+    def parse_score_map(cls, v):
+        if isinstance(v, str):
+            return json.loads(v)
+        return v
+
     class Config:
         from_attributes = True
 
