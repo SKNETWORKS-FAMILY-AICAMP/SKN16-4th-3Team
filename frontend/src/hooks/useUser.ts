@@ -28,13 +28,25 @@ export const useUser = (id: number) => {
 
 /**
  * 현재 사용자 정보 조회 훅
+ * API가 준비되지 않아 localStorage에서 사용자 정보를 가져옵니다
  */
 export const useCurrentUser = () => {
     return useQuery({
         queryKey: queryKeys.auth.currentUser(),
-        queryFn: userApi.getCurrentUser,
+        queryFn: () => {
+            const token = localStorage.getItem('access_token');
+            const userData = localStorage.getItem('user_data');
+
+            if (!token || !userData) {
+                throw new Error('로그인 정보가 없습니다');
+            }
+
+            return JSON.parse(userData) as User;
+        },
         // 토큰이 있을 때만 요청
         enabled: !!localStorage.getItem('access_token'),
+        retry: false, // API 호출이 아니므로 재시도 불필요
+        staleTime: Infinity, // localStorage 데이터는 fresh로 간주
     });
 };
 
@@ -105,6 +117,9 @@ export const useLogin = () => {
             // 토큰 저장
             localStorage.setItem('access_token', response.access_token);
 
+            // 사용자 정보도 localStorage에 저장
+            localStorage.setItem('user_data', JSON.stringify(response.user));
+
             // 현재 사용자 정보 캐시에 저장
             queryClient.setQueryData(queryKeys.auth.currentUser(), response.user);
 
@@ -127,8 +142,9 @@ export const useLogout = () => {
     const queryClient = useQueryClient();
 
     return () => {
-        // 토큰 제거
+        // 토큰 및 사용자 정보 제거
         localStorage.removeItem('access_token');
+        localStorage.removeItem('user_data');
 
         // 모든 쿼리 캐시 클리어
         queryClient.clear();
