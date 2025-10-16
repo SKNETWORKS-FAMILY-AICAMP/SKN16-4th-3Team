@@ -1,0 +1,32 @@
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="192" height="192" rx="20" fill="url(#gradient-bg)"/>
+  
+  <!-- Color Palette Icon -->
+  <g transform="translate(40, 40)">
+    <!-- Main Palette Shape -->
+    <path d="M56 12C75.8823 12 92 28.1177 92 48C92 57.9411 88.0457 66.8171 81.8995 73.6569L78.1005 69.8579C83.2457 64.0589 86 56.4706 86 48C86 31.4315 72.5685 18 56 18C39.4315 18 26 31.4315 26 48C26 64.5685 39.4315 78 56 78H66V84H56C28.1177 84 12 67.8823 12 48C12 28.1177 28.1177 12 56 12Z" fill="white" stroke="white" stroke-width="1"/>
+    
+    <!-- Color Dots -->
+    <circle cx="42" cy="36" r="6" fill="#FF6B9D"/>
+    <circle cx="56" cy="32" r="6" fill="#4ECDC4"/>
+    <circle cx="70" cy="36" r="6" fill="#45B7D1"/>
+    <circle cx="44" cy="48" r="6" fill="#96CEB4"/>
+    <circle cx="58" cy="48" r="6" fill="#FECA57"/>
+    <circle cx="48" cy="60" r="6" fill="#FF9FF3"/>
+    <circle cx="62" cy="60" r="6" fill="#A8E6CF"/>
+    
+    <!-- Brush Handle -->
+    <rect x="74" y="58" width="6" height="20" rx="3" fill="white"/>
+    <ellipse cx="77" cy="56" rx="4" ry="6" fill="#8B5CF6"/>
+  </g>
+  
+  <!-- Gradient Definitions -->
+  <defs>
+    <linearGradient id="gradient-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>
