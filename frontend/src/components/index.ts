@@ -1,6 +1,6 @@
 // auth 컴포넌트들
 export { default as SignUpForm } from './auth/SignUpForm';
-
+export { default as LoginForm } from './auth/LoginForm';
 
 // common 컴포넌트
 
