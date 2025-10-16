@@ -81,7 +81,7 @@ class SurveyAnswer(BaseModel):
     """
     id: int
     survey_result_id: int
-    question_id: str
+    question_id: int
     option_id: str
     option_label: str
     score_map: Dict[str, int]

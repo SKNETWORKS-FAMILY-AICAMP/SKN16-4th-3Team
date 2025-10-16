@@ -24,14 +24,13 @@ class SurveyResult(Base):
     result_tone = Column(String(20))
     confidence = Column(Float)
     total_score = Column(Integer)
-    answers = relationship("SurveyAnswer", back_populates="result")
+    answers = relationship("SurveyAnswer", back_populates="result", cascade="all, delete-orphan")
 
 class SurveyAnswer(Base):
     __tablename__ = "survey_answer"
     id = Column(Integer, primary_key=True, index=True)
-    survey_result_id = Column(Integer, ForeignKey("survey_result.id"))
-    question_id = Column(String(50))
+    survey_result_id = Column(Integer, ForeignKey("survey_result.id"), nullable=False)
+    question_id = Column(Integer)  # 질문 ID
     option_id = Column(String(50))
     option_label = Column(String(255))
-    score_map = Column(Text)  # JSON 문자열
     result = relationship("SurveyResult", back_populates="answers")
