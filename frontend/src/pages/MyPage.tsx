@@ -1,8 +1,8 @@
 import React from 'react';
-import { Row, Col, Card, Typography, Button, Space, Avatar } from 'antd';
-import { UserOutlined, EditOutlined, ManOutlined, WomanOutlined } from '@ant-design/icons';
+import { Row, Col, Card, Typography, Button, Avatar, Modal, message } from 'antd';
+import { UserOutlined, ManOutlined, WomanOutlined, DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { useCurrentUser } from '@/hooks/useUser';
+import { useCurrentUser, useDeleteCurrentUser } from '@/hooks/useUser';
 import { getGenderAvatarConfig } from '@/utils/genderUtils';
 import RouterPaths from '@/routes/Router';
 
@@ -14,10 +14,50 @@ const { Title, Text } = Typography;
 const MyPage: React.FC = () => {
     const { data: user, isLoading } = useCurrentUser();
     const navigate = useNavigate();
+    const deleteCurrentUser = useDeleteCurrentUser();
 
     // 퍼스널 컬러 테스트로 이동
     const handleGoToTest = () => {
         navigate(RouterPaths.PersonalColorTest);
+    };
+
+    // 회원 탈퇴 확인 모달
+    const handleDeleteAccount = () => {
+        Modal.confirm({
+            title: '비밀번호 확인',
+            icon: <ExclamationCircleOutlined />,
+            content: (
+                <div className="mt-4">
+                    <p className="mb-3">탈퇴하면 모든 데이터가 삭제되며 복구할 수 없습니다.</p>
+                    <input
+                        id="password-input"
+                        type="password"
+                        placeholder="비밀번호를 입력해주세요"
+                        className="w-full p-2 border border-gray-300 rounded"
+                    />
+                </div>
+            ),
+            okText: '탈퇴하기',
+            okType: 'danger',
+            cancelText: '취소',
+            onOk() {
+                const passwordInput = document.getElementById('password-input') as HTMLInputElement;
+                const password = passwordInput?.value;
+
+                if (!password) {
+                    message.error('비밀번호를 입력해주세요.');
+                    return Promise.reject();
+                }
+
+                return deleteCurrentUser.mutateAsync({ password })
+                    .then(() => {
+                        navigate(RouterPaths.Home);
+                    })
+                    .catch(() => {
+                        return Promise.reject();
+                    });
+            },
+        });
     };
 
     // 성별에 따른 아바타 렌더링
@@ -74,115 +114,155 @@ const MyPage: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 pt-20 pb-8">
-            <div className="max-w-4xl mx-auto px-4">
-                <Title level={2} className="text-center mb-8">
+        <div className="min-h-screen bg-gray-50 pt-20 pb-8 mt-4">
+            <div className="max-w-6xl mx-auto px-4">
+                <Title level={2} className="mb-8 text-gray-800">
                     마이페이지
                 </Title>
 
-                <Row gutter={[24, 24]}>
-                    {/* 사용자 정보 카드 */}
-                    <Col xs={24} md={12}>
+                <Row gutter={[32, 32]}>
+                    {/* 왼쪽 박스 - 프로필 정보 */}
+                    <Col xs={24} lg={10}>
                         <Card
-                            title="프로필 정보"
-                            className="shadow-lg border-0"
-                            style={{ borderRadius: '16px' }}
-                            extra={
-                                <Button
-                                    type="text"
-                                    icon={<EditOutlined />}
-                                    onClick={() => {
-                                        // TODO: 프로필 수정 기능 구현
-                                        console.log('프로필 수정 기능 구현 필요');
-                                    }}
-                                >
-                                    수정
-                                </Button>
-                            }
+                            className="shadow-sm border border-gray-200"
+                            style={{ borderRadius: '8px' }}
                         >
-                            <div className="text-center mb-6">
+                            {/* 아바타, 닉네임, 이름 센터 배치 */}
+                            <div className="flex flex-col items-center justify-center py-2 border-b border-gray-100">
                                 {(() => {
                                     const avatarConfig = getGenderAvatar();
                                     const config = getGenderAvatarConfig(user?.gender, user?.id);
 
                                     return (
                                         <Avatar
-                                            size={80}
+                                            size={100}
                                             className={`${avatarConfig.className} mb-4`}
                                             style={avatarConfig.style}
                                         >
                                             {config.avatarType === 'emoji' ? (
-                                                <span style={{ fontSize: '40px' }}>{config.emoji}</span>
+                                                <span style={{ fontSize: '50px' }}>{config.emoji}</span>
                                             ) : (
                                                 avatarConfig.content
                                             )}
                                         </Avatar>
                                     );
                                 })()}
-                                <Title level={4} className="mb-0">
+                                <Title level={3} className="mb-2 text-gray-800 text-center">
                                     {user.nickname}
                                 </Title>
-                                <Text type="secondary">@{user.username}</Text>
+                                <Text className="text-gray-500 text-lg text-center">
+                                    {user.username}
+                                </Text>
                             </div>
 
-                            <Space direction="vertical" className="w-full" size="middle">
-                                <div>
-                                    <Text strong>이메일:</Text>
-                                    <div>{user.email}</div>
-                                </div>
-                                {user.gender && (
-                                    <div>
-                                        <Text strong>성별:</Text>
-                                        <div>{user.gender}</div>
+                            {/* 진단 기록, 저장된 결과 데이터 */}
+                            {/* TODO: survey api 개발 후 연동 */}
+                            <div className="p-2">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="text-center">
+                                        <div className="text-2xl font-bold text-blue-600 mb-1">0</div>
+                                        <Text className="text-gray-600">진단 기록</Text>
                                     </div>
-                                )}
-                            </Space>
+                                    <div className="text-center">
+                                        <div className="text-2xl font-bold text-green-600 mb-1">0</div>
+                                        <Text className="text-gray-600">저장된 결과</Text>
+                                    </div>
+                                </div>
+                            </div>
                         </Card>
                     </Col>
 
-                    {/* 활동 정보 카드 */}
-                    <Col xs={24} md={12}>
+                    {/* 오른쪽 박스 - 상세 정보 */}
+                    <Col xs={24} lg={14}>
                         <Card
-                            title="활동 정보"
-                            className="shadow-lg border-0"
-                            style={{ borderRadius: '16px' }}
+                            className="shadow-sm border border-gray-200"
+                            style={{ borderRadius: '8px' }}
                         >
-                            <Space direction="vertical" className="w-full" size="middle">
-                                <div>
-                                    <Text strong>진단 기록:</Text>
-                                    <div>0회</div>
-                                </div>
-                                <div>
-                                    <Text strong>저장된 결과:</Text>
-                                    <div>0개</div>
-                                </div>
-                                <div>
-                                    <Text strong>가입일:</Text>
-                                    <div>최근 가입</div>
-                                </div>
-                            </Space>
+                            <div className="px-6 py-2">
+                                <Title level={4} className="mb-6 text-gray-800">상세 정보</Title>
 
-                            <div className="mt-6">
-                                <Button type="primary" block onClick={handleGoToTest}>
-                                    퍼스널 컬러 진단하기
-                                </Button>
+                                <div className="grid grid-cols-2 gap-6">
+                                    {/* 첫 번째 행 */}
+                                    <div className="flex flex-col py-3 border-b border-gray-100">
+                                        <Text strong className="text-gray-700 mb-2">이메일</Text>
+                                        <Text className="text-gray-900">{user.email}</Text>
+                                    </div>
+
+                                    <div className="flex flex-col py-3 border-b border-gray-100">
+                                        <Text strong className="text-gray-700 mb-2">성별</Text>
+                                        <Text className="text-gray-900">{user.gender || '미설정'}</Text>
+                                    </div>
+
+                                    {/* 두 번째 행 */}
+                                    {/* TODO: /me api에 create_date 추가 */}
+                                    <div className="flex flex-col py-3">
+                                        <Text strong className="text-gray-700 mb-2">가입일</Text>
+                                        <Text className="text-gray-900">최근 가입</Text>
+                                    </div>
+
+                                    {/* TODO: /me api에 is_active 추가 */}
+                                    <div className="flex flex-col py-3">
+                                        <Text strong className="text-gray-700 mb-2">계정 상태</Text>
+                                        <div className="flex items-center">
+                                            <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                                            <Text className="text-green-600">활성</Text>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </Card>
                     </Col>
                 </Row>
 
-                {/* 추가 섹션들 */}
+                {/* 최근 진단 기록 섹션 */}
                 <Row className="mt-8">
                     <Col span={24}>
                         <Card
-                            title="최근 진단 결과"
-                            className="shadow-lg border-0"
-                            style={{ borderRadius: '16px' }}
+                            className="shadow-sm border border-gray-200"
+                            style={{ borderRadius: '8px' }}
                         >
-                            <div className="text-center py-8">
-                                <Text type="secondary">아직 진단 기록이 없습니다.</Text>
-                                <div className="mt-4">
-                                    <Button type="primary" onClick={handleGoToTest}>첫 진단 시작하기</Button>
+                            <div className="px-6 py-2">
+                                <Title level={4} className="mb-6 text-gray-800">최근 진단 기록</Title>
+                                <div className="text-center py-12 bg-gray-50 rounded-lg">
+                                    <Text className="text-gray-500 text-base">아직 진단 기록이 없습니다.</Text>
+                                    <div className="mt-4">
+                                        <Button type="primary" size="large" onClick={handleGoToTest}>
+                                            첫 진단 시작하기
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
+                    </Col>
+                </Row>
+
+                {/* 계정 관리 섹션 */}
+                <Row className="mt-8">
+                    <Col span={24}>
+                        <Card
+                            className="shadow-sm border border-red-200"
+                            style={{ borderRadius: '8px' }}
+                        >
+                            <div className="px-6 py-2">
+                                <Title level={4} className="mb-4 text-red-600">계정 관리</Title>
+                                <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                                    <div className="flex justify-between items-center">
+                                        <div>
+                                            <Text strong className="text-red-700">회원 탈퇴</Text>
+                                            <div className="mt-1">
+                                                <Text className="text-red-600 text-sm">
+                                                    탈퇴 시 모든 개인정보와 진단 기록이 영구적으로 삭제됩니다.
+                                                </Text>
+                                            </div>
+                                        </div>
+                                        <Button
+                                            danger
+                                            icon={<DeleteOutlined />}
+                                            onClick={handleDeleteAccount}
+                                        >
+                                            회원 탈퇴
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         </Card>
