@@ -1,0 +1,40 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with rounded corners for iOS -->
+  <rect width="180" height="180" rx="40" fill="url(#gradient-bg)"/>
+  
+  <!-- Color Palette Icon -->
+  <g transform="translate(35, 35)">
+    <!-- Main Palette Shape -->
+    <path d="M55 10C77.0914 10 95 27.9086 95 50C95 61.0457 90.8381 71.0172 84.1421 78.5685L80.1421 74.5685C85.3381 68.4828 88 60.6903 88 50C88 32.3269 73.6731 18 55 18C36.3269 18 22 32.3269 22 50C22 67.6731 36.3269 82 55 82H65V90H55C27.9086 90 10 72.0914 10 50C10 27.9086 27.9086 10 55 10Z" fill="white" stroke="white" stroke-width="2"/>
+    
+    <!-- Color Dots - Larger and more vibrant -->
+    <circle cx="40" cy="35" r="8" fill="#FF6B9D"/>
+    <circle cx="55" cy="30" r="8" fill="#4ECDC4"/>
+    <circle cx="70" cy="35" r="8" fill="#45B7D1"/>
+    <circle cx="42" cy="50" r="8" fill="#96CEB4"/>
+    <circle cx="58" cy="50" r="8" fill="#FECA57"/>
+    <circle cx="46" cy="65" r="8" fill="#FF9FF3"/>
+    <circle cx="62" cy="65" r="8" fill="#A8E6CF"/>
+    
+    <!-- Brush Handle -->
+    <rect x="75" y="60" width="8" height="25" rx="4" fill="white"/>
+    <ellipse cx="79" cy="57" rx="5" ry="8" fill="#8B5CF6"/>
+    
+    <!-- AI Spark Effect -->
+    <g opacity="0.8">
+      <path d="M25 25L27 20L29 25L34 23L29 27L27 32L25 27L20 23Z" fill="#FFD700"/>
+      <path d="M85 15L86 12L87 15L90 14L87 16L86 19L85 16L82 14Z" fill="#FFD700"/>
+      <path d="M90 75L91 73L92 75L94 74L92 76L91 78L90 76L88 74Z" fill="#FFD700"/>
+    </g>
+  </g>
+  
+  <!-- Gradient Definitions -->
+  <defs>
+    <linearGradient id="gradient-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="30%" style="stop-color:#764ba2;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#f093fb;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f5576c;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

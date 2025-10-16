@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import type { GenderType } from '@/api/user';
 import { useCreateUser } from '@/hooks/useUser';
+import RouterPaths from '@/routes/Router';
 
 interface SignUpFormValues {
     nickname: string;
@@ -24,8 +25,7 @@ const SignUpForm: React.FC = () => {
     const handleSubmit = async (values: SignUpFormValues) => {
         try {
             await createUser.mutateAsync(values);
-            // 성공 시 홈으로 이동
-            navigate('/');
+            navigate(RouterPaths.Login);
         } catch (error) {
             // 에러는 useCreateUser의 onError에서 처리됨
             console.error('회원가입 처리 중 에러:', error);
