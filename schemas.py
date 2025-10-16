@@ -1,8 +1,7 @@
-from pydantic import BaseModel, Field, model_validator, field_validator
+from pydantic import BaseModel, Field, model_validator
 import re
-from typing import List, Dict, Optional
+from typing import List, Optional
 import datetime
-import json
 
 class UserCreate(BaseModel):
     nickname: str = Field(min_length=2, max_length=14)
@@ -45,7 +44,7 @@ class User(BaseModel):
     nickname: str
     email: str
     gender: str | None = None
-    create_date: datetime
+    create_date: datetime.datetime
     is_active: bool
 
     class Config:
@@ -57,37 +56,43 @@ class Token(BaseModel):
     user: User
 
 class SurveyAnswerCreate(BaseModel):
-    question_id: str
+    """
+    사용자의 답변 데이터 (프론트엔드에서 전송)
+    - score_map, confidence, total_score는 OpenAI에서 받을 예정
+    """
+    question_id: int
     option_id: str
     option_label: str
-    score_map: Dict[str, int]
 
 class SurveyResultCreate(BaseModel):
-    user_id: Optional[int] = None
-    answers: List[SurveyAnswerCreate]
-    result_tone: str
-    confidence: float
-    total_score: int
+    """
+    퍼스널 컬러 테스트 결과 생성 스키마
+    - answers: 모든 질문에 대한 답변 데이터만 포함
+    - OpenAI API에서 받을 데이터:
+      - result_tone: spring, summer, autumn, winter
+      - confidence: 0-1 사이의 신뢰도
+      - total_score: 종합 점수
+    """
+    answers: List[SurveyAnswerCreate]  # 사용자의 모든 답변
 
 class SurveyAnswer(BaseModel):
+    """
+    저장된 사용자 답변 (DB에서 조회)
+    """
     id: int
     survey_result_id: int
-    question_id: str
+    question_id: int
     option_id: str
     option_label: str
-    score_map: Dict[str, int]
-
-    @field_validator("score_map", mode="before")
-    @classmethod
-    def parse_score_map(cls, v):
-        if isinstance(v, str):
-            return json.loads(v)
-        return v
 
     class Config:
         from_attributes = True
 
 class SurveyResult(BaseModel):
+    """
+    설문 결과 응답 스키마
+    - 사용자의 과거 모든 설문 결과를 포함
+    """
     id: int
     user_id: Optional[int]
     created_at: datetime.datetime
