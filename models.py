@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, DateTime, Enum, Boolean, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, DateTime, Enum, Boolean, Float, ForeignKey, Text
 from sqlalchemy.orm import relationship
-import datetime
+from datetime import datetime, timezone
 from database import Base
 
 class User(Base):
@@ -12,28 +12,25 @@ class User(Base):
     password = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, index=True, nullable=False)
     gender = Column(Enum("여성", "남성", name="gender_enum"), nullable=True)
-    create_date = Column(DateTime, default=datetime.datetime.now)
-    is_active = Column(Boolean, default=True)
+    create_date = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    is_active = Column(Boolean, default=True)  # > is_deleted -> is_active 변경
 
+# 퍼스널컬러 진단 설문 저장용 모델 추가
 class SurveyResult(Base):
     __tablename__ = "survey_result"
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
-    created_at = Column(DateTime, default=datetime.datetime.now)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     result_tone = Column(String(20))
-    confidence = Column(String(20))
+    confidence = Column(Float)
     total_score = Column(Integer)
-
-    user = relationship("User", backref="survey_results")
-    answers = relationship("SurveyAnswer", back_populates="survey", cascade="all, delete-orphan")
+    answers = relationship("SurveyAnswer", back_populates="result", cascade="all, delete-orphan")
 
 class SurveyAnswer(Base):
     __tablename__ = "survey_answer"
     id = Column(Integer, primary_key=True, index=True)
     survey_result_id = Column(Integer, ForeignKey("survey_result.id"), nullable=False)
-    question_id = Column(String(100), nullable=False)
-    option_id = Column(String(100), nullable=False)
-    option_label = Column(Text, nullable=False)
-    score_map = Column(Text, nullable=True)
-
-    survey = relationship("SurveyResult", back_populates="answers")
+    question_id = Column(Integer)  # 질문 ID
+    option_id = Column(String(50))
+    option_label = Column(String(255))
+    result = relationship("SurveyResult", back_populates="answers")
