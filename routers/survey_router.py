@@ -105,6 +105,7 @@ def analyze_personal_color_with_openai(answers: list[schemas.SurveyAnswerCreate]
             "total_score": 50
         }
 
+# TODO: survey API 구현 필요. 현재 정상 동작 X
 @router.post("/submit", status_code=201)
 async def submit_survey(
     result: schemas.SurveyResultCreate,
