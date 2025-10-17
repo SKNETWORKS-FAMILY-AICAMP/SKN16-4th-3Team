@@ -444,9 +444,9 @@ const PersonalColorTest: React.FC = () => {
                                 size="large"
                                 className="flex items-center px-8"
                                 style={{
-                                    background: selectedAnswer
-                                        ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                                        : '#d1d5db',
+                                    background: !selectedAnswer
+                                        ? '#d1d5db'
+                                        : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                                     border: 'none',
                                     borderRadius: '10px'
                                 }}

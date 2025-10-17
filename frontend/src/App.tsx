@@ -27,7 +27,7 @@ function App() {
         <Header />
 
         {/* Main Routes */}
-        <div className='mt-16'>
+        <div className='mt-15'>
           <Routes>
             <Route path={RouterPaths.Home} element={<HomePage />} />
             <Route path={RouterPaths.SignUp} element={<SignUpPage />} />

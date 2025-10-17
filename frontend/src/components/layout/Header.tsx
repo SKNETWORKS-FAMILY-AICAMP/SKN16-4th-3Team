@@ -96,7 +96,7 @@ const Header: React.FC = () => {
 
   return (
     <header className="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
-      <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div className="max-w-6xl min-h-[64px] mx-auto px-4 py-2 flex justify-between items-center">
         <Title level={3} className="gradient-text !mb-0 cursor-pointer" onClick={() => navigate(RouterPaths.Home)}>
           퍼스널 컬러 진단 AI
         </Title>
