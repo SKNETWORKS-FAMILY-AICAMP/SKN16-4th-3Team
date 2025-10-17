@@ -6,6 +6,8 @@ from routers import user_router
 from routers import chatbot_router
 from routers import survey_router
 
+from routers import chatbot_router
+
 app = FastAPI()
 
 origins = [
