@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Enum, Boolean, Float, ForeignKey, Text
 from sqlalchemy.orm import relationship
-import datetime
+from datetime import datetime, timezone
 from database import Base
 
 class User(Base):
@@ -12,14 +12,14 @@ class User(Base):
     password = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, index=True, nullable=False)
     gender = Column(Enum("여성", "남성", name="gender_enum"), nullable=True)
-    create_date = Column(DateTime, default=datetime.datetime.now)
-    is_active = Column(Boolean, default=True)  # > is_deleted -> is_active 변경  
+    create_date = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    is_active = Column(Boolean, default=True)  # > is_deleted -> is_active 변경
 
 class SurveyResult(Base):
     __tablename__ = "survey_result"
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
-    created_at = Column(DateTime, default=datetime.datetime.now)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     result_tone = Column(String(20))  # spring/summer/autumn/winter
     confidence = Column(Float)
     total_score = Column(Integer)

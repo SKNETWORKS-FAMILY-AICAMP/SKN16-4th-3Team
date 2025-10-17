@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from database import SessionLocal
 import models, schemas
 import json
-import datetime
+from datetime import datetime, timezone
 from routers.user_router import get_current_user   # 인증 함수 import
 import os
 from openai import OpenAI
@@ -138,7 +138,7 @@ async def submit_survey(
         result_tone=result_tone,
         confidence=confidence,
         total_score=total_score,
-        created_at=datetime.datetime.now()
+        created_at=datetime.now(timezone.utc)
     )
     db.add(survey_result)
     db.flush()  # ID 생성을 위해 flush

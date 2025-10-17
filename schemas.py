@@ -1,9 +1,7 @@
 from datetime import datetime
-import json
-from pydantic import BaseModel, Field, model_validator, field_validator
+from pydantic import BaseModel, Field, model_validator
+from typing import List, Optional, Literal
 import re
-from typing import List, Optional
-import datetime
 
 class UserCreate(BaseModel):
     nickname: str = Field(min_length=2, max_length=14)
@@ -11,7 +9,7 @@ class UserCreate(BaseModel):
     password: str = Field(min_length=8, max_length=16)
     password_confirm: str
     email: str = Field(pattern=r'^[^@]+@[^@]+\.[^@]+$')
-    gender: str | None = None
+    gender: Literal['남성', '여성'] | None = None
 
     @model_validator(mode='after')
     def validate_all_fields(self):
@@ -45,7 +43,7 @@ class User(BaseModel):
     username: str
     nickname: str
     email: str
-    gender: str | None = None
+    gender: Literal['남성', '여성'] | None = None
     create_date: datetime
     is_active: bool
 
@@ -86,13 +84,6 @@ class SurveyAnswer(BaseModel):
     question_id: int
     option_id: str
     option_label: str
-
-    @field_validator("score_map", mode="before")
-    @classmethod
-    def parse_score_map(cls, v):
-        if isinstance(v, str):
-            return json.loads(v)
-        return v
 
     class Config:
         from_attributes = True
