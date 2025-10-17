@@ -3,7 +3,6 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
-import datetime as dt
 import os
 from dotenv import load_dotenv
 
@@ -51,7 +50,7 @@ def user_signup(user_create: schemas.UserCreate, db: Session = Depends(get_db)):
         password=hashed_password,
         email=user_create.email,
         gender=user_create.gender,
-        create_date=dt.datetime.now()
+        create_date=datetime.now()
     )
     db.add(new_user)
     db.commit()
@@ -73,7 +72,7 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     # JWT 토큰 발급 (nickname 기반)
     data = {
         "sub": user.nickname,
-        "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        "exp": datetime.now(datetime.timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     }
     access_token = jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
     # 유저 정보 반환 (Pydantic 변환)
