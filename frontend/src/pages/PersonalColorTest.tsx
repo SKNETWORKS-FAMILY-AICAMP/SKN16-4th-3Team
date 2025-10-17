@@ -17,13 +17,15 @@ import {
     ArrowLeftOutlined,
     ArrowRightOutlined,
     ReloadOutlined,
-    CheckCircleOutlined
+    CheckCircleOutlined,
+    SaveOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { usePersonalColorTest } from '@/hooks/usePersonalColorTest';
 import { useCurrentUser } from '@/hooks/useUser';
 import RouterPaths from '@/routes/Router';
 import type { PersonalColorType } from '@/types/personalColor';
+import { surveyApi, type SurveyAnswer } from '../api/survey';
 
 const { Title, Text } = Typography;
 
@@ -42,6 +44,7 @@ const PersonalColorTest: React.FC = () => {
 
     const [selectedAnswer, setSelectedAnswer] = React.useState<string>('');
     const [expandedType, setExpandedType] = React.useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
 
     // 질문이 변경될 때마다 화면을 최상단으로 스크롤
     useEffect(() => {
@@ -84,6 +87,61 @@ const PersonalColorTest: React.FC = () => {
         setExpandedType(null);
         // 화면을 최상단으로 스크롤
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // 결과 제출하기
+    const handleSubmitResult = async () => {
+        console.log('▶ handleSubmitResult 시작');
+        console.log('  result:', result);
+        console.log('  progress:', progress);
+
+        if (!result || !progress.answers) {
+            message.error('진단 결과를 불러올 수 없습니다.');
+            console.error('❌ result 또는 progress.answers가 없음');
+            return;
+        }
+
+        if (progress.answers.length === 0) {
+            message.error('답변 데이터가 없습니다.');
+            console.error('❌ progress.answers가 비어있음');
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            // progress.answers를 survey API 형식으로 변환
+            const answers: SurveyAnswer[] = progress.answers.map(answer => {
+                console.log('  답변 변환 중:', answer);
+                return {
+                    question_id: answer.questionId,
+                    option_id: answer.optionId,
+                    option_label: answer.optionLabel || '(라벨 없음)'
+                };
+            });
+
+            console.log('📤 전송할 데이터:', { answers });
+            console.log('📤 JSON 형식:', JSON.stringify({ answers }));
+
+            // API 호출
+            const response = await surveyApi.submitSurvey({ answers });
+
+            message.success('🎉 진단 결과가 저장되었습니다!');
+            console.log('✅ 설문 제출 성공:', response);
+
+            // 잠시 후 홈으로 이동
+            setTimeout(() => {
+                navigate(RouterPaths.Home);
+            }, 1500);
+        } catch (error) {
+            console.error('❌ 설문 제출 실패:', error);
+            // 에러 상세 정보 로깅
+            if (error instanceof Error) {
+                console.error('에러 메시지:', error.message);
+            }
+            message.error('진단 결과 저장에 실패했습니다. 다시 시도해주세요.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     // 홈으로 가기
@@ -433,7 +491,7 @@ const PersonalColorTest: React.FC = () => {
                         })()}
 
                         {/* 액션 버튼 */}
-                        <div className="flex gap-4 justify-center">
+                        <div className="flex gap-3 justify-center flex-wrap">
                             <Button
                                 size="large"
                                 icon={<ReloadOutlined />}
@@ -450,11 +508,26 @@ const PersonalColorTest: React.FC = () => {
                             <Button
                                 type="primary"
                                 size="large"
+                                icon={<SaveOutlined />}
+                                onClick={handleSubmitResult}
+                                loading={isSubmitting}
+                                disabled={isSubmitting}
+                                className="px-8"
+                                style={{
+                                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                    border: 'none',
+                                    borderRadius: '10px'
+                                }}
+                            >
+                                {isSubmitting ? '저장 중...' : '결과 저장'}
+                            </Button>
+                            <Button
+                                size="large"
                                 onClick={handleGoHome}
                                 className="px-8"
                                 style={{
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                    border: 'none',
+                                    borderColor: '#d1d5db',
+                                    color: '#6b7280',
                                     borderRadius: '10px'
                                 }}
                             >

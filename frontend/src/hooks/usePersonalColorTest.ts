@@ -52,6 +52,7 @@ export const usePersonalColorTest = (): UsePersonalColorTestReturn => {
         const newAnswer: PersonalColorAnswer = {
             questionId: currentQuestion.id,
             optionId: optionId,
+            optionLabel: selectedOption.label,
             scores: selectedOption.scores
         };
 

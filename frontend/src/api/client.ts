@@ -55,6 +55,11 @@ apiClient.interceptors.response.use(
         // 에러 응답 처리
         console.error('❌ Response Error:', error.response?.status, error.message);
 
+        // 422 Validation Error 상세 정보 로깅
+        if (error.response?.status === 422) {
+            console.error('❌ Validation Error Details:', error.response?.data);
+        }
+
         // 401 에러 시 토큰 제거 및 로그인 페이지로 리다이렉트
         if (error.response?.status === 401) {
             localStorage.removeItem('access_token');
