@@ -45,7 +45,7 @@ class User(BaseModel):
     nickname: str
     email: str
     gender: str | None = None
-    create_date: datetime.datetime
+    create_date: datetime
     is_active: bool
 
     class Config:
