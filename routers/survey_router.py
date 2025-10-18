@@ -131,17 +131,52 @@ def analyze_personal_color_with_openai(answers: list[schemas.SurveyAnswerCreate]
 
 이 답변들을 기반으로 사용자의 퍼스널 컬러 타입을 분석하세요.
 
+반드시 다음 가이드라인을 따라주세요:
+- 메인 타입 1개와 추천 타입 2개로 총 3개의 타입을 제공해주세요
+- 각 타입의 description은 문학적이고 감성적으로 작성해주세요
+- name은 이모지와 함께 일관된 형식으로 작성해주세요 (예: '봄 웜톤 🌸')
+
 분석 결과는 다음 형식으로 JSON으로 반드시 응답해주세요:
 {{
     "result_tone": "spring|summer|autumn|winter 중 정확히 하나",
     "confidence": 0-100 사이의 숫자 (신뢰도 퍼센트, 진단의 확실성 정도),
-    "total_score": 0-100 사이의 숫자 (종합 점수, 타입 특성의 부합도)
+    "total_score": 0-100 사이의 숫자 (종합 점수, 타입 특성의 부합도),
+    "detailed_analysis": "사용자의 답변을 기반으로 한 자세한 분석 설명 (200-400자 정도)",
+    "top_types": [
+        {{
+            "type": "spring|summer|autumn|winter",
+            "name": "퍼스널 컬러 타입명 (반드시 '봄 웜톤 🌸' 형식)",
+            "description": "타입의 특성을 문학적이고 감성적으로 표현한 설명 (30-50자)",
+            "color_palette": ["#FF6F61", "#FFD1B3", "#FFE5B4", "#98FB98", "#40E0D0"],
+            "style_keywords": ["화사함", "발랄함", "생동감", "밝음", "따뜻함"],
+            "makeup_tips": ["코럴 블러셔", "피치 립", "골든 아이섀도우", "브라운 마스카라"],
+            "score": 0-100 (해당 타입과의 일치도)
+        }},
+        {{
+            "type": "두 번째로 적합한 타입",
+            "name": "두 번째 타입명 (동일한 형식)",
+            "description": "두 번째 타입의 감성적 설명",
+            "color_palette": ["색상 코드 5개"],
+            "style_keywords": ["키워드 5개"],
+            "makeup_tips": ["메이크업 팁 4개"],
+            "score": 첫 번째보다 10-20점 낮은 점수
+        }},
+        {{
+            "type": "세 번째로 적합한 타입",
+            "name": "세 번째 타입명 (동일한 형식)",
+            "description": "세 번째 타입의 감성적 설명",
+            "color_palette": ["색상 코드 5개"],
+            "style_keywords": ["키워드 5개"],
+            "makeup_tips": ["메이크업 팁 4개"],
+            "score": 두 번째보다 10-15점 낮은 점수
+        }}
+    ]
 }}
 
 응답은 반드시 JSON 형식만 포함해야 합니다. 다른 설명은 포함하지 마세요."""
 
     try:
-        # OpenAI API 호출
+        # OpenAI API 호출 (타임아웃 30초)
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -149,7 +184,8 @@ def analyze_personal_color_with_openai(answers: list[schemas.SurveyAnswerCreate]
                 {"role": "user", "content": user_prompt}
             ],
             temperature=0.7,
-            max_tokens=500
+            max_tokens=1500,  # 토큰 수 증가
+            timeout=30.0  # 30초 타임아웃
         )
         
         # 응답 파싱
@@ -169,6 +205,198 @@ def analyze_personal_color_with_openai(answers: list[schemas.SurveyAnswerCreate]
         result["confidence"] = max(0, min(100, int(result.get("confidence", 50))))
         result["total_score"] = max(0, min(100, int(result.get("total_score", 50))))
         
+        # detailed_analysis 검증
+        if not result.get("detailed_analysis"):
+            result["detailed_analysis"] = "답변을 종합 분석한 결과입니다."
+        
+        # top_types 검증 및 기본값 설정
+        if not result.get("top_types") or not isinstance(result.get("top_types"), list):
+            # 기본 타입 데이터 생성
+            type_names = {
+                "spring": "봄 웜톤 🌸",
+                "summer": "여름 쿨톤 💎", 
+                "autumn": "가을 웜톤 🍂",
+                "winter": "겨울 쿨톤 ❄️"
+            }
+            type_descriptions = {
+                "spring": "밝고 생기 있는 봄날의 따뜻함을 담은 당신",
+                "summer": "시원하고 우아한 여름날의 세련됨을 담은 당신",
+                "autumn": "깊고 따뜻한 가을날의 포근함을 담은 당신", 
+                "winter": "시원하고 강렬한 겨울날의 우아함을 담은 당신"
+            }
+            type_palettes = {
+                "spring": ["#FF6F61", "#FFD1B3", "#FFE5B4", "#98FB98", "#40E0D0"],
+                "summer": ["#F8BBD9", "#E6E6FA", "#ADD8E6", "#DDA0DD", "#D3D3D3"],
+                "autumn": ["#800020", "#8B7355", "#FFD700", "#FF4500", "#556B2F"],
+                "winter": ["#000000", "#FFFFFF", "#4169E1", "#FF1493", "#DC143C"]
+            }
+            type_styles = {
+                "spring": ["화사함", "발랄함", "생동감", "밝음", "따뜻함"],
+                "summer": ["차분함", "세련됨", "우아함", "로맨틱", "부드러움"],
+                "autumn": ["따뜻함", "성숙함", "깊이", "풍성함", "고급스러움"],
+                "winter": ["강렬함", "고급스러움", "시크함", "도시적", "명확함"]
+            }
+            type_makeup = {
+                "spring": ["코럴 블러셔", "피치 립", "골든 아이섀도우", "브라운 마스카라"],
+                "summer": ["로즈 블러셔", "더스티핑크 립", "라벤더 아이섀도우", "브라운 마스카라"],
+                "autumn": ["오렌지 블러셔", "브릭레드 립", "골든브라운 아이섀도우", "브라운 마스카라"],
+                "winter": ["푸시아 블러셔", "트루레드 립", "스모키 아이섀도우", "블랙 마스카라"]
+            }
+            
+            # 메인 타입을 첫 번째로, 나머지 타입들을 추가 (최소 2개, 최대 3개)
+            main_type = result["result_tone"]
+            all_types = ["spring", "summer", "autumn", "winter"]
+            other_types = [t for t in all_types if t != main_type]
+            
+            result["top_types"] = [
+                {
+                    "type": main_type,
+                    "name": type_names[main_type],
+                    "description": type_descriptions[main_type],
+                    "color_palette": type_palettes[main_type],
+                    "style_keywords": type_styles[main_type],
+                    "makeup_tips": type_makeup[main_type],
+                    "score": result.get("total_score", 85)
+                },
+                {
+                    "type": other_types[0],
+                    "name": type_names[other_types[0]],
+                    "description": type_descriptions[other_types[0]],
+                    "color_palette": type_palettes[other_types[0]],
+                    "style_keywords": type_styles[other_types[0]],
+                    "makeup_tips": type_makeup[other_types[0]],
+                    "score": max(60, result.get("total_score", 85) - 20)
+                },
+                {
+                    "type": other_types[1],
+                    "name": type_names[other_types[1]],
+                    "description": type_descriptions[other_types[1]],
+                    "color_palette": type_palettes[other_types[1]],
+                    "style_keywords": type_styles[other_types[1]],
+                    "makeup_tips": type_makeup[other_types[1]],
+                    "score": max(40, result.get("total_score", 85) - 35)
+                }
+            ]
+        else:
+            # top_types가 있는 경우 최소 2개, 최대 3개로 제한하고 필수 필드 검증
+            if len(result["top_types"]) < 2:
+                # 2개 미만이면 기본 타입들로 채우기
+                main_type = result["result_tone"]
+                all_types = ["spring", "summer", "autumn", "winter"]
+                other_types = [t for t in all_types if t != main_type]
+                
+                # 부족한 만큼 기본 데이터로 추가 (개선된 fallback 데이터)
+                type_names = {
+                    "spring": "봄 웜톤 🌸",
+                    "summer": "여름 쿨톤 💎", 
+                    "autumn": "가을 웜톤 🍂",
+                    "winter": "겨울 쿨톤 ❄️"
+                }
+                type_descriptions = {
+                    "spring": "밝고 생기 있는 봄날의 따뜻함을 담은 당신",
+                    "summer": "시원하고 우아한 여름날의 세련됨을 담은 당신",
+                    "autumn": "깊고 따뜻한 가을날의 포근함을 담은 당신", 
+                    "winter": "시원하고 강렬한 겨울날의 우아함을 담은 당신"
+                }
+                type_palettes = {
+                    "spring": ["#FF6F61", "#FFD1B3", "#FFE5B4", "#98FB98", "#40E0D0"],
+                    "summer": ["#F8BBD9", "#E6E6FA", "#ADD8E6", "#DDA0DD", "#D3D3D3"],
+                    "autumn": ["#800020", "#8B7355", "#FFD700", "#FF4500", "#556B2F"],
+                    "winter": ["#000000", "#FFFFFF", "#4169E1", "#FF1493", "#DC143C"]
+                }
+                type_styles = {
+                    "spring": ["화사함", "발랄함", "생동감", "밝음", "따뜻함"],
+                    "summer": ["차분함", "세련됨", "우아함", "로맨틱", "부드러움"],
+                    "autumn": ["따뜻함", "성숙함", "깊이", "풍성함", "고급스러움"],
+                    "winter": ["강렬함", "고급스러움", "시크함", "도시적", "명확함"]
+                }
+                type_makeup = {
+                    "spring": ["코럴 블러셔", "피치 립", "골든 아이섀도우", "브라운 마스카라"],
+                    "summer": ["로즈 블러셔", "더스티핑크 립", "라벤더 아이섀도우", "브라운 마스카라"],
+                    "autumn": ["오렌지 블러셔", "브릭레드 립", "골든브라운 아이섀도우", "브라운 마스카라"],
+                    "winter": ["푸시아 블러셔", "트루레드 립", "스모키 아이섀도우", "블랙 마스카라"]
+                }
+                
+                while len(result["top_types"]) < 3:
+                    missing_index = len(result["top_types"]) - 1
+                    if missing_index < len(other_types):
+                        type_key = other_types[missing_index]
+                        result["top_types"].append({
+                            "type": type_key,
+                            "name": type_names[type_key],
+                            "description": type_descriptions[type_key],
+                            "color_palette": type_palettes[type_key],
+                            "style_keywords": type_styles[type_key],
+                            "makeup_tips": type_makeup[type_key],
+                            "score": max(50, result.get("total_score", 85) - (len(result["top_types"]) * 15))
+                        })
+            
+            # 최대 3개로 제한
+            result["top_types"] = result["top_types"][:3]
+            
+            # 개선된 fallback 데이터
+            fallback_data = {
+                "spring": {
+                    "name": "봄 웜톤 🌸",
+                    "description": "밝고 생기 있는 봄날의 따뜻함을 담은 당신",
+                    "color_palette": ["#FF6F61", "#FFD1B3", "#FFE5B4", "#98FB98", "#40E0D0"],
+                    "style_keywords": ["화사함", "발랄함", "생동감", "밝음", "따뜻함"],
+                    "makeup_tips": ["코럴 블러셔", "피치 립", "골든 아이섀도우", "브라운 마스카라"]
+                },
+                "summer": {
+                    "name": "여름 쿨톤 💎",
+                    "description": "시원하고 우아한 여름날의 세련됨을 담은 당신",
+                    "color_palette": ["#F8BBD9", "#E6E6FA", "#ADD8E6", "#DDA0DD", "#D3D3D3"],
+                    "style_keywords": ["차분함", "세련됨", "우아함", "로맨틱", "부드러움"],
+                    "makeup_tips": ["로즈 블러셔", "더스티핑크 립", "라벤더 아이섀도우", "브라운 마스카라"]
+                },
+                "autumn": {
+                    "name": "가을 웜톤 🍂",
+                    "description": "깊고 따뜻한 가을날의 포근함을 담은 당신",
+                    "color_palette": ["#800020", "#8B7355", "#FFD700", "#FF4500", "#556B2F"],
+                    "style_keywords": ["따뜻함", "성숙함", "깊이", "풍성함", "고급스러움"],
+                    "makeup_tips": ["오렌지 블러셔", "브릭레드 립", "골든브라운 아이섀도우", "브라운 마스카라"]
+                },
+                "winter": {
+                    "name": "겨울 쿨톤 ❄️",
+                    "description": "시원하고 강렬한 겨울날의 우아함을 담은 당신",
+                    "color_palette": ["#000000", "#FFFFFF", "#4169E1", "#FF1493", "#DC143C"],
+                    "style_keywords": ["강렬함", "고급스러움", "시크함", "도시적", "명확함"],
+                    "makeup_tips": ["푸시아 블러셔", "트루레드 립", "스모키 아이섀도우", "블랙 마스카라"]
+                }
+            }
+            
+            for i, type_data in enumerate(result["top_types"]):
+                if not isinstance(type_data, dict):
+                    continue
+                # 필수 필드 검증 및 개선된 fallback 적용
+                type_key = type_data.get("type", result["result_tone"] if i == 0 else "spring")
+                if type_key not in fallback_data:
+                    type_key = "spring"
+                
+                type_data["type"] = type_key
+                
+                if not type_data.get("name") or type_data["name"] == f"{type_key} 타입":
+                    type_data["name"] = fallback_data[type_key]["name"]
+                if not type_data.get("description") or type_data["description"] in ["추가 타입입니다.", "퍼스널 컬러 타입입니다."]:
+                    type_data["description"] = fallback_data[type_key]["description"]
+                if not type_data.get("color_palette") or not isinstance(type_data.get("color_palette"), list):
+                    type_data["color_palette"] = fallback_data[type_key]["color_palette"]
+                if not type_data.get("style_keywords") or not isinstance(type_data.get("style_keywords"), list):
+                    type_data["style_keywords"] = fallback_data[type_key]["style_keywords"]
+                if not type_data.get("makeup_tips") or not isinstance(type_data.get("makeup_tips"), list):
+                    type_data["makeup_tips"] = fallback_data[type_key]["makeup_tips"]
+                if not type_data.get("score"):
+                    type_data["score"] = max(50, result.get("total_score", 85) - (i * 15))
+                    
+        # 하위 호환성을 위한 메인 타입 정보 추출
+        main_type_data = result["top_types"][0] if result["top_types"] else {}
+        result["name"] = main_type_data.get("name", "퍼스널 컬러")
+        result["description"] = main_type_data.get("description", "당신만의 특별한 컬러")
+        result["color_palette"] = main_type_data.get("color_palette", [])
+        result["style_keywords"] = main_type_data.get("style_keywords", [])
+        result["makeup_tips"] = main_type_data.get("makeup_tips", [])
+        
         print(f"✅ OpenAI 분석 완료: {result}")
         return result
         
@@ -178,7 +406,28 @@ def analyze_personal_color_with_openai(answers: list[schemas.SurveyAnswerCreate]
         return {
             "result_tone": "spring",
             "confidence": 50,
-            "total_score": 50
+            "total_score": 50,
+            "detailed_analysis": "분석 처리 중 오류가 발생했습니다.",
+            "top_types": [
+                {
+                    "type": "spring",
+                    "name": "봄 웜톤 🌸",
+                    "description": "밝고 생기 있는 봄날의 따뜻함을 담은 당신",
+                    "color_palette": ["#FF6F61", "#FFD1B3", "#FFE5B4", "#98FB98", "#40E0D0"],
+                    "style_keywords": ["화사함", "발랄함", "생동감", "밝음", "따뜻함"],
+                    "makeup_tips": ["코럴 블러셔", "피치 립", "골든 아이섀도우", "브라운 마스카라"],
+                    "score": 50
+                },
+                {
+                    "type": "summer",
+                    "name": "여름 쿨톤 💎",
+                    "description": "시원하고 우아한 여름날의 세련됨을 담은 당신",
+                    "color_palette": ["#F8BBD9", "#E6E6FA", "#ADD8E6", "#DDA0DD", "#D3D3D3"],
+                    "style_keywords": ["차분함", "세련됨", "우아함", "로맨틱", "부드러움"],
+                    "makeup_tips": ["로즈 블러셔", "더스티핑크 립", "라벤더 아이섀도우", "브라운 마스카라"],
+                    "score": 35
+                }
+            ]
         }
     except Exception as e:
         print(f"❌ OpenAI API 호출 오류: {e}")
@@ -186,7 +435,28 @@ def analyze_personal_color_with_openai(answers: list[schemas.SurveyAnswerCreate]
         return {
             "result_tone": "spring",
             "confidence": 50,
-            "total_score": 50
+            "total_score": 50,
+            "detailed_analysis": "OpenAI API 연결에 문제가 발생했습니다.",
+            "top_types": [
+                {
+                    "type": "spring",
+                    "name": "봄 웜톤 🌸",
+                    "description": "밝고 생기 있는 봄날의 따뜻함을 담은 당신",
+                    "color_palette": ["#FF6F61", "#FFD1B3", "#FFE5B4", "#98FB98", "#40E0D0"],
+                    "style_keywords": ["화사함", "발랄함", "생동감", "밝음", "따뜻함"],
+                    "makeup_tips": ["코럴 블러셔", "피치 립", "골든 아이섀도우", "브라운 마스카라"],
+                    "score": 50
+                },
+                {
+                    "type": "summer",
+                    "name": "여름 쿨톤 💎",
+                    "description": "시원하고 우아한 여름날의 세련됨을 담은 당신",
+                    "color_palette": ["#F8BBD9", "#E6E6FA", "#ADD8E6", "#DDA0DD", "#D3D3D3"],
+                    "style_keywords": ["차분함", "세련됨", "우아함", "로맨틱", "부드러움"],
+                    "makeup_tips": ["로즈 블러셔", "더스티핑크 립", "라벤더 아이섀도우", "브라운 마스카라"],
+                    "score": 35
+                }
+            ]
         }
 
 # TODO: survey API 구현 필요. 현재 정상 동작 X
@@ -245,50 +515,68 @@ async def submit_survey(
     print(f"▶ 받은 답변 수: {len(result.answers)}")
     print(f"▶ 받은 데이터: {result}")
 
-    # 1. OpenAI API 호출로 result_tone, confidence, total_score 받기
-    print("▶ OpenAI API로 퍼스널 컬러 분석 중...")
-    openai_result = analyze_personal_color_with_openai(result.answers)
-    result_tone = openai_result['result_tone']
-    confidence = openai_result['confidence']
-    total_score = openai_result['total_score']
-    
-    print(f"✅ 분석 완료 - tone: {result_tone}, confidence: {confidence}, score: {total_score}")
+    try:
+        # 1. OpenAI API 호출로 result_tone, confidence, total_score 받기
+        print("▶ OpenAI API로 퍼스널 컬러 분석 중...")
+        openai_result = analyze_personal_color_with_openai(result.answers)
+        result_tone = openai_result['result_tone']
+        confidence = openai_result['confidence']
+        total_score = openai_result['total_score']
+        
+        print(f"✅ 분석 완료 - tone: {result_tone}, confidence: {confidence}, score: {total_score}")
 
-    # 2. Survey Result 생성
-    survey_result = models.SurveyResult(
-        user_id=current_user.id,
-        result_tone=result_tone,
-        confidence=confidence,
-        total_score=total_score,
-        created_at=datetime.now(timezone.utc)
-    )
-    db.add(survey_result)
-    db.flush()  # ID 생성을 위해 flush
-    
-    print(f"▶ SurveyResult 생성: ID {survey_result.id}")
-    
-    # 3. 모든 답변 저장
-    for ans in result.answers:
-        answer = models.SurveyAnswer(
-            survey_result_id=survey_result.id,
-            question_id=ans.question_id,
-            option_id=ans.option_id,
-            option_label=ans.option_label
+        # 2. Survey Result 생성
+        survey_result = models.SurveyResult(
+            user_id=current_user.id,
+            result_tone=result_tone,
+            confidence=confidence,
+            total_score=total_score,
+            created_at=datetime.now(timezone.utc)
         )
-        db.add(answer)
+        db.add(survey_result)
+        db.flush()  # ID 생성을 위해 flush
+        
+        print(f"▶ SurveyResult 생성: ID {survey_result.id}")
+        
+        # 3. 모든 답변 저장
+        for ans in result.answers:
+            answer = models.SurveyAnswer(
+                survey_result_id=survey_result.id,
+                question_id=ans.question_id,
+                option_id=ans.option_id,
+                option_label=ans.option_label
+            )
+            db.add(answer)
+        
+        db.commit()
+        db.refresh(survey_result)
+        
+        print(f"✅ 설문 결과 저장 완료 - Survey ID: {survey_result.id}")
+        
+        return {
+            "message": "설문 결과 저장 완료", 
+            "survey_result_id": survey_result.id,
+            "result_tone": result_tone,
+            "confidence": confidence,
+            "total_score": total_score,
+            "detailed_analysis": openai_result.get('detailed_analysis', '분석 결과가 준비되지 않았습니다.'),
+            "top_types": openai_result.get('top_types', []),
+            "name": openai_result.get('name', '퍼스널 컬러'),
+            "description": openai_result.get('description', '당신만의 특별한 컬러'),
+            "color_palette": openai_result.get('color_palette', []),
+            "style_keywords": openai_result.get('style_keywords', []),
+            "makeup_tips": openai_result.get('makeup_tips', [])
+        }
     
-    db.commit()
-    db.refresh(survey_result)
-    
-    print(f"✅ 설문 결과 저장 완료 - Survey ID: {survey_result.id}")
-    
-    return {
-        "message": "설문 결과 저장 완료", 
-        "survey_result_id": survey_result.id,
-        "result_tone": result_tone,
-        "confidence": confidence,
-        "total_score": total_score
-    }
+    except Exception as e:
+        print(f"❌ 설문 처리 중 오류 발생: {e}")
+        db.rollback()  # 롤백
+        
+        # OpenAI API 오류 등 예외 상황에서도 기본 응답 제공
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="분석 서비스에 일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요."
+        )
 
 @router.get("/list", response_model=list[schemas.SurveyResult])
 async def get_my_survey_results(
