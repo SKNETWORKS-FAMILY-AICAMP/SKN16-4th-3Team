@@ -525,12 +525,19 @@ async def submit_survey(
         
         print(f"✅ 분석 완료 - tone: {result_tone}, confidence: {confidence}, score: {total_score}")
 
-        # 2. Survey Result 생성
+        # 2. Survey Result 생성 (상세 분석 결과 포함)
         survey_result = models.SurveyResult(
             user_id=current_user.id,
             result_tone=result_tone,
             confidence=confidence,
             total_score=total_score,
+            detailed_analysis=openai_result.get('detailed_analysis'),
+            result_name=openai_result.get('name'),
+            result_description=openai_result.get('description'),
+            color_palette=json.dumps(openai_result.get('color_palette', []), ensure_ascii=False),
+            style_keywords=json.dumps(openai_result.get('style_keywords', []), ensure_ascii=False),
+            makeup_tips=json.dumps(openai_result.get('makeup_tips', []), ensure_ascii=False),
+            top_types=json.dumps(openai_result.get('top_types', []), ensure_ascii=False),
             created_at=datetime.now(timezone.utc)
         )
         db.add(survey_result)
