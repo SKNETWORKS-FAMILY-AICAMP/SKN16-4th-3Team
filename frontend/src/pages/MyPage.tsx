@@ -14,6 +14,7 @@ import {
   Divider,
   Tabs,
   Tooltip,
+  Dropdown,
 } from 'antd';
 import {
   UserOutlined,
@@ -23,10 +24,11 @@ import {
   ExclamationCircleOutlined,
   CalendarOutlined,
   TrophyOutlined,
+  MoreOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useCurrentUser, useDeleteCurrentUser } from '@/hooks/useUser';
-import { useSurveyResults } from '@/hooks/useSurvey';
+import { useSurveyResults, useDeleteSurvey } from '@/hooks/useSurvey';
 import { getGenderAvatarConfig } from '@/utils/genderUtils';
 import RouterPaths from '@/routes/Router';
 import type { SurveyResultDetail } from '@/api/survey';
@@ -43,6 +45,7 @@ const MyPage: React.FC = () => {
     useSurveyResults();
   const navigate = useNavigate();
   const deleteCurrentUser = useDeleteCurrentUser();
+  const deleteSurvey = useDeleteSurvey();
 
   // 상세보기 모달 상태
   const [selectedResult, setSelectedResult] =
@@ -64,6 +67,31 @@ const MyPage: React.FC = () => {
   const handleCloseDetailModal = () => {
     setIsDetailModalOpen(false);
     setSelectedResult(null);
+  };
+
+  // 진단 기록 삭제 확인
+  const handleDeleteSurvey = (surveyId: number, resultName: string) => {
+    Modal.confirm({
+      title: '진단 기록 삭제',
+      icon: <ExclamationCircleOutlined />,
+      content: (
+        <div className="mt-4">
+          <p>정말로 이 진단 기록을 삭제하시겠습니까?</p>
+          <p className="text-gray-600 text-sm mt-2">
+            <strong>{resultName}</strong>
+          </p>
+          <p className="text-red-500 text-sm mt-2">
+            삭제된 기록은 복구할 수 없습니다.
+          </p>
+        </div>
+      ),
+      okText: '삭제',
+      okType: 'danger',
+      cancelText: '취소',
+      onOk() {
+        return deleteSurvey.mutateAsync(surveyId);
+      },
+    });
   };
 
   // 회원 탈퇴 확인 모달
@@ -379,13 +407,40 @@ const MyPage: React.FC = () => {
                               )}
                             </div>
 
-                            <Button
-                              type="link"
-                              onClick={() => handleViewDetail(result)}
-                              className="text-blue-600"
-                            >
-                              상세보기
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                type="link"
+                                onClick={() => handleViewDetail(result)}
+                                className="text-blue-600"
+                              >
+                                상세보기
+                              </Button>
+                              <Dropdown
+                                menu={{
+                                  items: [
+                                    {
+                                      key: 'delete',
+                                      label: '삭제',
+                                      icon: <DeleteOutlined />,
+                                      danger: true,
+                                      onClick: () =>
+                                        handleDeleteSurvey(
+                                          result.id,
+                                          result.result_name ||
+                                            `${result.result_tone.toUpperCase()} 타입`
+                                        ),
+                                    },
+                                  ],
+                                }}
+                                trigger={['click']}
+                              >
+                                <Button
+                                  type="text"
+                                  icon={<MoreOutlined />}
+                                  size="small"
+                                />
+                              </Dropdown>
+                            </div>
                           </div>
                         </List.Item>
                       )}
@@ -448,6 +503,23 @@ const MyPage: React.FC = () => {
         open={isDetailModalOpen}
         onCancel={handleCloseDetailModal}
         footer={[
+          <Button
+            key="delete"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => {
+              if (selectedResult) {
+                handleDeleteSurvey(
+                  selectedResult.id,
+                  selectedResult.result_name ||
+                    `${selectedResult.result_tone.toUpperCase()} 타입`
+                );
+                handleCloseDetailModal();
+              }
+            }}
+          >
+            삭제
+          </Button>,
           <Button key="close" onClick={handleCloseDetailModal}>
             닫기
           </Button>,
