@@ -57,6 +57,13 @@ export interface SurveyResultDetail {
   result_tone: PersonalColorType;
   confidence: number;
   total_score: number;
+  detailed_analysis?: string;
+  result_name?: string;
+  result_description?: string;
+  color_palette?: string[];
+  style_keywords?: string[];
+  makeup_tips?: string[];
+  top_types?: PersonalColorTypeData[];
   answers: SurveyAnswer[];
 }
 
