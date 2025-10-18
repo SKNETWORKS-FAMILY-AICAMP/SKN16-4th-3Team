@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import user_router
 from routers import chatbot_router
 from routers import survey_router
+from routers import feedback_router
 
 from routers import chatbot_router
 
@@ -30,3 +31,4 @@ def read_root():
 app.include_router(user_router.router)
 app.include_router(chatbot_router.router)
 app.include_router(survey_router.router)
+app.include_router(feedback_router.router)
