@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Row,
   Col,
@@ -41,8 +41,11 @@ const { Title, Text } = Typography;
  */
 const MyPage: React.FC = () => {
   const { data: user, isLoading } = useCurrentUser();
-  const { data: surveyResults, isLoading: isLoadingSurveys } =
-    useSurveyResults();
+  const {
+    data: surveyResults,
+    isLoading: isLoadingSurveys,
+    refetch: refetchSurveyResults,
+  } = useSurveyResults();
   const navigate = useNavigate();
   const deleteCurrentUser = useDeleteCurrentUser();
   const deleteSurvey = useDeleteSurvey();
@@ -51,6 +54,32 @@ const MyPage: React.FC = () => {
   const [selectedResult, setSelectedResult] =
     useState<SurveyResultDetail | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  // 컴포넌트 마운트 시 및 페이지 포커스 시 설문 결과 새로고침
+  useEffect(() => {
+    // 페이지 진입 시 항상 최신 데이터 가져오기
+    refetchSurveyResults();
+
+    // 윈도우 포커스 시 데이터 새로고침 이벤트 핸들러
+    const handleFocus = () => {
+      refetchSurveyResults();
+    };
+
+    // 페이지 가시성 변경 시 데이터 새로고침
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refetchSurveyResults();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [refetchSurveyResults]);
 
   // 퍼스널 컬러 테스트로 이동
   const handleGoToTest = () => {

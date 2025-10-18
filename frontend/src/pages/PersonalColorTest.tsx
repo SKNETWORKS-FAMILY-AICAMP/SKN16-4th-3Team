@@ -22,6 +22,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { usePersonalColorTest } from '@/hooks/usePersonalColorTest';
 import { useCurrentUser } from '@/hooks/useUser';
+import { useQueryClient } from '@tanstack/react-query';
 import RouterPaths from '@/routes/Router';
 import type { PersonalColorType } from '@/types/personalColor';
 import {
@@ -35,6 +36,7 @@ const { Title, Text } = Typography;
 
 const PersonalColorTest: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: user, isLoading: userLoading } = useCurrentUser();
   const {
     currentQuestion,
@@ -128,6 +130,9 @@ const PersonalColorTest: React.FC = () => {
       // 로컬 결과도 생성하여 화면 표시
       goToNextQuestion();
       setSelectedAnswer('');
+
+      // 설문 결과 캐시 무효화 - 마이페이지에서 최신 데이터 표시를 위해
+      queryClient.invalidateQueries({ queryKey: ['surveyResults'] });
 
       message.success('🎉 퍼스널 컬러 분석이 완료되었습니다!');
     } catch (error: any) {
@@ -872,6 +877,20 @@ const PersonalColorTest: React.FC = () => {
                 }}
               >
                 다시 테스트
+              </Button>
+              <Button
+                size="large"
+                onClick={() => navigate(RouterPaths.MyPage)}
+                className="px-8"
+                style={{
+                  background:
+                    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  border: 'none',
+                  borderRadius: '10px',
+                  color: 'white',
+                }}
+              >
+                마이페이지에서 결과 보기
               </Button>
               <Button
                 type="primary"

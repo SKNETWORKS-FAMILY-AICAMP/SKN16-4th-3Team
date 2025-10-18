@@ -10,7 +10,10 @@ export const useSurveyResults = () => {
     queryKey: ['surveyResults'],
     queryFn: () => surveyApi.getSurveyResults(),
     retry: 2,
-    staleTime: 5 * 60 * 1000, // 5분
+    staleTime: 1 * 60 * 1000, // 1분으로 단축하여 더 자주 새로고침
+    refetchOnWindowFocus: true, // 윈도우 포커스 시 새로고침
+    refetchOnMount: true, // 컴포넌트 마운트 시 새로고침
+    refetchInterval: 2 * 60 * 1000, // 2분마다 자동 새로고침
   });
 };
 
