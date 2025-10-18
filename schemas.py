@@ -1,7 +1,8 @@
 from datetime import datetime
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, field_validator
 from typing import List, Dict, Optional, Literal
 import re
+import json
 
 class UserCreate(BaseModel):
     nickname: str = Field(min_length=2, max_length=14)
@@ -84,7 +85,7 @@ class SurveyAnswer(BaseModel):
     question_id: int
     option_id: str
     option_label: str
-    score_map: Dict[str, int]
+    score_map: Optional[Dict[str, int]] = None
 
     class Config:
         from_attributes = True
@@ -100,7 +101,57 @@ class SurveyResult(BaseModel):
     result_tone: str
     confidence: float
     total_score: int
+    
+    # OpenAI 분석 결과 상세 정보
+    detailed_analysis: Optional[str] = None
+    result_name: Optional[str] = None
+    result_description: Optional[str] = None
+    color_palette: Optional[List[str]] = None
+    style_keywords: Optional[List[str]] = None
+    makeup_tips: Optional[List[str]] = None
+    top_types: Optional[List[Dict]] = None
+    
     answers: List[SurveyAnswer] = []
+
+    @field_validator('color_palette', mode='before')
+    @classmethod
+    def parse_color_palette(cls, v):
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except (json.JSONDecodeError, TypeError):
+                return []
+        return v
+
+    @field_validator('style_keywords', mode='before')
+    @classmethod
+    def parse_style_keywords(cls, v):
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except (json.JSONDecodeError, TypeError):
+                return []
+        return v
+
+    @field_validator('makeup_tips', mode='before')
+    @classmethod
+    def parse_makeup_tips(cls, v):
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except (json.JSONDecodeError, TypeError):
+                return []
+        return v
+
+    @field_validator('top_types', mode='before')
+    @classmethod
+    def parse_top_types(cls, v):
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except (json.JSONDecodeError, TypeError):
+                return []
+        return v
 
     class Config:
         from_attributes = True

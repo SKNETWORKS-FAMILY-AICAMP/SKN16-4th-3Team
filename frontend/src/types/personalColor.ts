@@ -25,6 +25,7 @@ export interface PersonalColorScores {
 export interface PersonalColorAnswer {
     questionId: number;
     optionId: string;
+    optionLabel: string;
     scores: PersonalColorScores;
 }
 
