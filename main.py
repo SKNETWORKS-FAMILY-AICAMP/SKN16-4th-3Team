@@ -2,12 +2,8 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
-import json
 import logging
 from contextlib import asynccontextmanager
-
-# 데이터베이스 초기화
-from db_init import initialize_database
 
 # routers 폴더의 user_router를 import
 from routers import user_router
@@ -23,18 +19,7 @@ async def lifespan(app: FastAPI):
     """애플리케이션 lifespan 관리"""
     # 시작 시 실행되는 코드
     logger.info("🚀 퍼스널컬러 진단 서버가 시작됩니다...")
-    
-    # 데이터베이스 초기화
-    try:
-        success = initialize_database()
-        if success:
-            logger.info("✅ 데이터베이스 초기화가 완료되었습니다.")
-        else:
-            logger.warning("⚠️ 데이터베이스 초기화에 문제가 있습니다. 수동으로 확인해주세요.")
-    except Exception as e:
-        logger.error(f"❌ 데이터베이스 초기화 실패: {e}")
-        # 서버는 계속 실행하되, 경고 로그만 남김
-        logger.warning("⚠️ 데이터베이스 문제가 있지만 서버는 계속 실행됩니다.")
+    logger.info("💡 데이터베이스 설정이 필요하면 'alembic upgrade head'를 실행하세요.")
     
     yield  # 여기서 애플리케이션이 실행됨
     

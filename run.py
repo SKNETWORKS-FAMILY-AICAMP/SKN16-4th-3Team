@@ -2,7 +2,6 @@ import os
 import uvicorn
 import logging
 from dotenv import load_dotenv
-from db_init import initialize_database
 
 # 환경 변수 로드
 load_dotenv()
@@ -17,16 +16,14 @@ PORT = int(os.getenv("PORT", "8000"))
 if __name__ == "__main__":
     logger.info("🚀 퍼스널컬러 진단 서버를 시작합니다...")
     
-    # 서버 실행 전 데이터베이스 초기화
-    logger.info("📊 데이터베이스를 초기화합니다...")
-    try:
-        if initialize_database():
-            logger.info("✅ 데이터베이스 초기화 완료!")
-        else:
-            logger.warning("⚠️ 데이터베이스 초기화에 문제가 있습니다.")
-    except Exception as e:
-        logger.error(f"❌ 데이터베이스 초기화 실패: {e}")
-        logger.info("🔄 서버는 계속 실행됩니다. 수동으로 데이터베이스를 확인해주세요.")
+    # migrations/versions 폴더 확인 및 생성
+    versions_dir = os.path.join(os.path.dirname(__file__), 'migrations', 'versions')
+    if not os.path.exists(versions_dir):
+        os.makedirs(versions_dir)
+        logger.info(f"📁 생성된 마이그레이션 버전 폴더: {versions_dir}")
+    
+    # 데이터베이스 관리는 Alembic을 사용하세요
+    logger.info("💡 데이터베이스 설정이 필요하면 'alembic upgrade head'를 실행하세요.")
     
     # 서버 실행
     logger.info(f"🌐 서버 실행: http://{HOST}:{PORT}")
